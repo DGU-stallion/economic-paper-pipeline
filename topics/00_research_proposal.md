@@ -121,7 +121,6 @@ $$employ_{it} = \alpha + \beta_1 dig\_index_{it} \cdot I(q_{it} \leq \theta) + \
 **目标数据库**：
 - CNKI（中文核心、CSSCI）
 - Google Scholar
-- Zotero 文献管理
 
 **必读经典文献**：
 - Acemoglu & Restrepo (2019) *Automation and New Tasks: How Technology Displaces and Reinstates Labor*

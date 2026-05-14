@@ -55,9 +55,16 @@ paper/
 
 ## 六、编译说明
 
-论文需在 Overleaf 编译（XeLaTeX → biber → XeLaTeX → XeLaTeX）。本地不安装 LaTeX 发行版。
+论文使用本地 TeX Live 编译。在 `paper/` 目录下执行：
 
-将 `paper/` 目录全部内容上传至 Overleaf 项目后，设置编译器为 XeLaTeX 即可编译。
+```bash
+xelatex main.tex
+biber main
+xelatex main.tex
+xelatex main.tex
+```
+
+需安装 TeX Live 及 `collection-langchinese` 和 `collection-bibtexextra` 宏包组。
 
 ## 七、后续可改进方向
 

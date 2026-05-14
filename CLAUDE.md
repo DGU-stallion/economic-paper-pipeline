@@ -121,7 +121,7 @@ analysis/
   do-files/         Stata .do 文件（按阶段编号: 01_describe.do, 02_regression.do...）
   logs/             Stata 运行日志
   output/           结果输出（表格 .tex/.csv、图形 .pdf/.png）
-paper/              论文源码（LaTeX 文件，或 Overleaf 同步目录）
+paper/              论文源码（LaTeX 文件）
 ```
 
 ## 技术栈约定
@@ -151,8 +151,8 @@ paper/              论文源码（LaTeX 文件，或 Overleaf 同步目录）
 - 模板: `paper/chinese-erj.cls`（来自 [EthanDeng/Chinese-ERJ](https://github.com/EthanDeng/Chinese-ERJ)）
 - 主文件: `paper/main.tex`，章节文件: `paper/sections/NN_*.tex`
 - 参考文献: `paper/erjref.bib`
-- 编译命令（本地用）: `xelatex → biber → xelatex → xelatex`
-- 当前使用 Overleaf，不安装本地 LaTeX 发行版
+- 编译命令: `xelatex → biber → xelatex → xelatex`
+- 本地 TeX Live 发行版编译
 
 ### 论文约束 (Paper Constraints)
 
@@ -194,7 +194,6 @@ paper/              论文源码（LaTeX 文件，或 Overleaf 同步目录）
 | 服务器 | 用途 | 启动方式 |
 |--------|------|---------|
 | **stata-mcp** | StataMP 18 回归分析 | `uvx stata-mcp` |
-| **zotero** | Zotero 文献管理 | `uvx zotero-mcp`, `ZOTERO_LOCAL=true` |
 | **paper-search-mcp** | 学术文献搜索（arXiv/PubMed/Google Scholar） | `uv run --with paper-search-mcp python -m paper_search_mcp.server` |
 
 ### stata-mcp
@@ -213,32 +212,28 @@ paper/              论文源码（LaTeX 文件，或 Overleaf 同步目录）
 
 **可用工具**：`stata_do`、`write_dofile`、`get_data_info`、`read_log`、`ado_package_install`、`help`
 
-### zotero
-
-使用 [kujenga/zotero-mcp](https://github.com/kujenga/zotero-mcp) 连接 Zotero 桌面应用。
-
-**前置条件**：Zotero → 编辑 → 设置 → 高级 → 勾选"允许在此计算机上的其他应用程序与 Zotero 通信"，且 Zotero 须保持运行。
-
-**可用工具**：`zotero_search_items`（搜索条目）、`zotero_item_metadata`（获取元数据）、`zotero_item_fulltext`（获取全文）
-
 ### paper-search-mcp
 
 使用 [paper-search-mcp](https://github.com/openags/paper-search-mcp) 搜索学术文献。
 
 **可用工具**（13 个）：`search_arxiv`、`search_pubmed`、`search_google_scholar` 等搜索功能，以及对应的下载和全文读取功能。
 
-## Overleaf
+## LaTeX 编译
 
-论文使用 Overleaf 在线撰写和编译。
+论文使用本地 TeX Live 发行版编译（因 Overleaf 免费版有编译时长限制）。
 
-**工作流**：
-1. 论文源码在 `paper/` 目录中本地维护（LaTeX 文件 + 模板）
-2. 本地只做版本管理和写作
-3. 需上传 Overleaf 编译时，手动将 `paper/` 全部内容上传/拖拽至 Overleaf 项目
-4. Overleaf 编译器必须设为 **XeLaTeX**（菜单 → Compiler → XeLaTeX）
-5. Overleaf 已预装 `biblatex-gb7714-2015` 宏包（含 `chinese-erj` 参考文献样式），无需额外配置
+**编译命令**（项目根目录执行）：
+```bash
+cd paper
+xelatex main.tex
+biber main
+xelatex main.tex
+xelatex main.tex
+```
 
-> 不安装本地 LaTeX 发行版，依赖 Overleaf 在线编译引擎。
+**前置条件**：安装 [TeX Live](https://tug.org/texlive/)（Windows 用户建议用 TeX Live GUI 安装器，安装 `collection-langchinese` 和 `collection-bibtexextra` 以包含 `biblatex-gb7714-2015` 宏包）。
+
+> 论文源码在 `paper/` 目录中本地维护，随项目版本管理。
 
 ## 人机协作协议
 

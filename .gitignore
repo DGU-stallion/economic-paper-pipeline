@@ -80,5 +80,5 @@ doctor_test.log
 *.snm
 *.vrb
 
-# Compiled PDF (source of truth is Overleaf)
+# Compiled PDF (source of truth is local compile)
 paper/main.pdf

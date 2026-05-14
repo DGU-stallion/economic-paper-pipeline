@@ -4,7 +4,7 @@
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-blue)](https://www.python.org/)
 [![StataMP 18](https://img.shields.io/badge/StataMP-18-1f6f1f)](https://www.stata.com/)
-[![LaTeX](https://img.shields.io/badge/LaTeX-XeLaTeX-008080)](https://www.overleaf.com/)
+[![LaTeX](https://img.shields.io/badge/LaTeX-XeLaTeX-008080)](https://tug.org/texlive/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -134,8 +134,7 @@
 |------|------|------|
 | **Python** | 3.12+ | 数据获取、清洗、转换 |
 | **StataMP** | 18 | 计量回归分析 |
-| **LaTeX (XeLaTeX)** | — | 论文排版（Overleaf 编译） |
-| **Overleaf** | — | 在线 LaTeX 编译与协作 |
+| **LaTeX (XeLaTeX)** | — | 论文排版（本地 TeX Live 编译） |
 | **MCP 协议** | — | AI 工具与本地软件的集成桥接 |
 
 ### Python 依赖
@@ -152,7 +151,6 @@ pandas, numpy, requests, beautifulsoup4, yfinance, openpyxl, statsmodels
 |--------|------|
 | [stata-mcp](https://github.com/SepineTam/stata-mcp) | 操作本地 StataMP 18 执行 .do 文件 |
 | [paper-search-mcp](https://github.com/openags/paper-search-mcp) | 搜索 arXiv / PubMed / Google Scholar |
-| [zotero-mcp](https://github.com/kujenga/zotero-mcp) | 连接 Zotero 文献管理 |
 
 ---
 
@@ -163,8 +161,7 @@ pandas, numpy, requests, beautifulsoup4, yfinance, openpyxl, statsmodels
 - [Python](https://www.python.org/) 3.12+
 - [StataMP 18](https://www.stata.com/)（安装于 `D:\Program Files\Stata\StataMP-64.exe`）
 - [uv](https://docs.astral.sh/uv/)（Python 包管理器，用于运行 MCP 服务器）
-- [Zotero](https://www.zotero.org/)（文献管理，可选）
-- Overleaf 账号（论文编译）
+- [TeX Live](https://tug.org/texlive/)（LaTeX 编译，需包含 `collection-langchinese` 和 `collection-bibtexextra`）
 
 ### 快速开始
 
@@ -210,11 +207,15 @@ Stata .do 文件位于 `analysis/do-files/`，按编号顺序执行：
 
 ### 论文编译
 
-论文使用 Overleaf 在线编译：
+论文使用本地 TeX Live 编译：
 
-1. 将 `paper/` 目录全部内容上传至 Overleaf 项目
-2. 设置编译器为 **XeLaTeX**（菜单 → Compiler → XeLaTeX）
-3. 编译顺序：`XeLaTeX → biber → XeLaTeX → XeLaTeX`
+```bash
+cd paper
+xelatex main.tex
+biber main
+xelatex main.tex
+xelatex main.tex
+```
 
 ---
 
