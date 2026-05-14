@@ -1,0 +1,48 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{面板门槛回归：城镇化的调节效应\label{tab:threshold}}
+\begin{tabular}{l*{3}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                    &\multicolumn{1}{c}{全样本门槛}&\multicolumn{1}{c}{低城镇化}&\multicolumn{1}{c}{高城镇化}\\
+\midrule
+数字经济 × 低城镇化 &       0.200\sym{**} &                     &                     \\
+                    &     (0.076)         &                     &                     \\
+\addlinespace
+数字经济 × 高城镇化 &       0.388\sym{***}&                     &                     \\
+                    &     (0.092)         &                     &                     \\
+\addlinespace
+digital\_economy\_index&                     &       0.140\sym{*}  &      -0.130         \\
+                    &                     &     (0.069)         &     (0.214)         \\
+\addlinespace
+gdp\_percapita       &      -0.000         &      -0.000\sym{*}  &       0.000         \\
+                    &     (0.000)         &     (0.000)         &     (0.000)         \\
+\addlinespace
+fixed\_capital\_investment&      -0.025         &      -0.004         &       0.277         \\
+                    &     (0.025)         &     (0.026)         &     (0.205)         \\
+\addlinespace
+export\_share        &      -0.018         &       0.006         &       0.777         \\
+                    &     (0.086)         &     (0.110)         &     (0.356)         \\
+\addlinespace
+government\_expenditure&       0.002         &      -0.001         &       0.032         \\
+                    &     (0.003)         &     (0.003)         &     (0.025)         \\
+\addlinespace
+internet\_penetration&      -0.020         &       0.016         &       0.496         \\
+                    &     (0.023)         &     (0.026)         &     (0.266)         \\
+\addlinespace
+mobile\_phone\_penetration&       0.001\sym{*}  &       0.001         &       0.001         \\
+                    &     (0.000)         &     (0.000)         &     (0.000)         \\
+\addlinespace
+education\_expenditure&       0.000         &       0.000\sym{*}  &       0.000         \\
+                    &     (0.000)         &     (0.000)         &     (0.000)         \\
+\addlinespace
+education\_share     &       1.617\sym{*}  &       0.956         &     -13.034\sym{*}  \\
+                    &     (0.897)         &     (0.772)         &     (3.136)         \\
+\midrule
+Observations        &         403         &         368         &          35         \\
+\bottomrule
+\multicolumn{4}{l}{\footnotesize 注：门槛变量为城镇化率，最优门槛值为 .8231589794158936。}\\
+\multicolumn{4}{l}{\footnotesize 全样本门槛回归同时包含低/高两组数字经济的交互项。}\\
+\multicolumn{4}{l}{\footnotesize * p$<$0.10, ** p$<$0.05, *** p$<$0.01}\\
+\end{tabular}
+\end{table}

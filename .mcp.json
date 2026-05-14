@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "stata-mcp": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "stata-mcp"
+      ],
+      "env": {
+        "STATA_MCP__CWD": "D:\\Project\\economic-paper-pipeline"
+      }
+    },
+    "paper-search-mcp": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "paper-search-mcp",
+        "python",
+        "-m",
+        "paper_search_mcp.server"
+      ]
+    }
+  }
+}

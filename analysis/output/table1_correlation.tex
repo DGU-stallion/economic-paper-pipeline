@@ -1,0 +1,26 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{相关系数矩阵}
+\begin{tabular}{l*{12}{c}}
+\hline\hline
+          &\multicolumn{12}{c}{(1)}                                                                                                                                                                                                           \\
+          &\multicolumn{12}{c}{}                                                                                                                                                                                                              \\
+          &tertiary\_employment\_share         &digital\_economy\_index         &digital\_finance\_index         &gdp\_percapita         &fixed\_capital\_investment         &export\_share         &government\_expenditure         &internet\_penetration         &mobile\_phone\_penetration         &education\_expenditure         &education\_share         &urbanization\_rate         \\
+\hline
+tertiary\_employment\_share&        1         &                  &                  &                  &                  &                  &                  &                  &                  &                  &                  &                  \\
+digital\_economy\_index&    0.650\sym{***}&        1         &                  &                  &                  &                  &                  &                  &                  &                  &                  &                  \\
+digital\_finance\_index&    0.528\sym{***}&    0.738\sym{***}&        1         &                  &                  &                  &                  &                  &                  &                  &                  &                  \\
+gdp\_percapita&    0.649\sym{***}&    0.633\sym{***}&    0.635\sym{***}&        1         &                  &                  &                  &                  &                  &                  &                  &                  \\
+fixed\_capital\_investment&   -0.493\sym{***}&   -0.397\sym{***}&   -0.297\sym{***}&   -0.595\sym{***}&        1         &                  &                  &                  &                  &                  &                  &                  \\
+export\_share&    0.269\sym{***}&    0.170\sym{***}&   0.0956         &    0.510\sym{***}&   -0.463\sym{***}&        1         &                  &                  &                  &                  &                  &                  \\
+government\_expenditure&   0.0655         &    0.314\sym{***}&    0.487\sym{***}&    0.154\sym{**} &  -0.0764         &   0.0212         &        1         &                  &                  &                  &                  &                  \\
+internet\_penetration&    0.376\sym{***}&    0.576\sym{***}&    0.863\sym{***}&    0.514\sym{***}&   -0.292\sym{***}&    0.121\sym{*}  &    0.407\sym{***}&        1         &                  &                  &                  &                  \\
+mobile\_phone\_penetration&    0.714\sym{***}&    0.749\sym{***}&    0.686\sym{***}&    0.796\sym{***}&   -0.581\sym{***}&    0.423\sym{***}&    0.169\sym{***}&    0.573\sym{***}&        1         &                  &                  &                  \\
+education\_expenditure&    0.177\sym{***}&    0.315\sym{***}&    0.463\sym{***}&    0.407\sym{***}&   -0.253\sym{***}&    0.445\sym{***}&    0.777\sym{***}&    0.419\sym{***}&    0.306\sym{***}&        1         &                  &                  \\
+education\_share&  -0.0441         &   -0.115\sym{*}  &   -0.146\sym{**} &   -0.407\sym{***}&    0.378\sym{***}&   -0.334\sym{***}&   -0.261\sym{***}&  -0.0847         &   -0.257\sym{***}&   -0.399\sym{***}&        1         &                  \\
+urbanization\_rate&    0.601\sym{***}&    0.577\sym{***}&    0.512\sym{***}&    0.847\sym{***}&   -0.629\sym{***}&    0.548\sym{***}&   0.0484         &    0.389\sym{***}&    0.784\sym{***}&    0.281\sym{***}&   -0.610\sym{***}&        1         \\
+\hline\hline
+\multicolumn{13}{l}{\footnotesize Pearson相关系数.}\\
+\multicolumn{13}{l}{\footnotesize \sym{*} \(p<0.05\), \sym{**} \(p<0.01\), \sym{***} \(p<0.001\)}\\
+\end{tabular}
+\end{table}

@@ -1,0 +1,84 @@
+# ========================
+# Data
+# ========================
+data/raw/*
+!data/raw/.gitkeep
+data/clean/*
+!data/clean/.gitkeep
+
+# ========================
+# Stata outputs and logs
+# ========================
+analysis/logs/*.log
+analysis/logs/*.smcl
+analysis/logs/*.dta
+
+# Root-level Stata batch logs
+stata_batch__*.log
+
+# ========================
+# MCP working directories
+# ========================
+.statamcp/
+.playwright-mcp/
+
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ========================
+# IDE
+# ========================
+.vscode/
+.idea/
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Claude Code (user-specific config)
+# ========================
+.claude/
+
+# ========================
+# Pipeline state (machine-local checkpoint)
+# ========================
+pipeline_state.json
+
+# ========================
+# Diagnostics
+# ========================
+doctor_test.log
+
+# ========================
+# LaTeX build artifacts
+# ========================
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nlo
+*.nls
+*.brf
+*.nav
+*.snm
+*.vrb
+
+# Compiled PDF (source of truth is Overleaf)
+paper/main.pdf

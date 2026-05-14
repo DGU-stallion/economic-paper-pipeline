@@ -1,0 +1,43 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{异质性分析：东中西分样本回归\label{tab:heterogeneity}}
+\begin{tabular}{l*{4}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{全样本}&\multicolumn{1}{c}{东部}&\multicolumn{1}{c}{中部}&\multicolumn{1}{c}{西部}\\
+\midrule
+digital\_economy\_index&       0.277\sym{***}&       0.304\sym{**} &       1.781\sym{**} &       0.158         \\
+                    &     (0.085)         &     (0.117)         &     (0.707)         &     (0.143)         \\
+\addlinespace
+gdp\_percapita       &       0.000         &       0.000         &      -0.000         &      -0.000         \\
+                    &     (0.000)         &     (0.000)         &     (0.000)         &     (0.000)         \\
+\addlinespace
+fixed\_capital\_investment&      -0.016         &      -0.046         &      -0.009         &       0.030         \\
+                    &     (0.026)         &     (0.039)         &     (0.045)         &     (0.032)         \\
+\addlinespace
+export\_share        &      -0.049         &      -0.051         &       0.293         &      -0.264         \\
+                    &     (0.096)         &     (0.126)         &     (0.271)         &     (0.184)         \\
+\addlinespace
+government\_expenditure&       0.000         &       0.003         &      -0.002         &      -0.001         \\
+                    &     (0.003)         &     (0.007)         &     (0.007)         &     (0.003)         \\
+\addlinespace
+internet\_penetration&      -0.037         &      -0.029         &      -0.092         &       0.035         \\
+                    &     (0.025)         &     (0.028)         &     (0.063)         &     (0.049)         \\
+\addlinespace
+mobile\_phone\_penetration&       0.001\sym{**} &       0.000         &       0.000         &       0.002\sym{***}\\
+                    &     (0.000)         &     (0.000)         &     (0.002)         &     (0.000)         \\
+\addlinespace
+education\_expenditure&       0.000         &      -0.000\sym{**} &       0.000         &       0.000         \\
+                    &     (0.000)         &     (0.000)         &     (0.000)         &     (0.000)         \\
+\addlinespace
+education\_share     &       1.649\sym{*}  &       3.052         &       3.375         &       0.544         \\
+                    &     (0.970)         &     (3.717)         &     (3.663)         &     (0.967)         \\
+\midrule
+Observations        &         403         &         143         &         104         &         156         \\
+Within R2           &       0.537         &       0.531         &       0.795         &       0.650         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize 注：所有模型均包含控制变量、省份固定效应和年份固定效应，省份聚类标准误。}\\
+\multicolumn{5}{l}{\footnotesize 东部11省、中部8省、西部12省。}\\
+\multicolumn{5}{l}{\footnotesize * p$<$0.10, ** p$<$0.05, *** p$<$0.01}\\
+\end{tabular}
+\end{table}

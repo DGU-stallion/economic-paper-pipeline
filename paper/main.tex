@@ -1,0 +1,49 @@
+% ============================================================
+% 《经济研究》格式论文主文件
+% 编译: xelatex → biber → xelatex → xelatex
+% Overleaf 需将编译器设为 XeLaTeX
+% ============================================================
+\documentclass{chinese-erj}
+\usepackage{booktabs}
+
+% ---- 论文元信息 ----
+\title{数字经济发展对省际就业结构的影响——基于面板门槛模型的实证研究%
+    \thanks{本文使用数据来自 Figshare 公开数据集及北京大学数字金融研究中心。}}
+\author{作者}
+\header{数字经济发展对省际就业结构的影响}
+
+% ---- 英文元信息 ----
+\entitle{The Impact of Digital Economy Development on Provincial Employment Structure in China: An Empirical Study Based on Panel Threshold Model}
+\enauthor{Author}
+\eninstitute{School of Economics}
+\enabstract{This paper examines the impact of digital economy development on provincial employment structure using a balanced panel of 31 Chinese provinces from 2011 to 2023. Employing a two-way fixed effects model and the Hansen (1999) panel threshold model, we find that: (1) digital economy development significantly increases the share of tertiary sector employment ($\beta=0.277$, $p<0.01$), and this result is robust across six progressive specifications and five robustness checks; (2) the employment structure effect exhibits regional heterogeneity, with the central region showing the largest marginal effect ($\beta=1.781$, $p<0.05$); (3) the broad digital economy composite index has a stronger effect than the narrow digital finance index alone. These findings suggest that digital transformation, rather than fintech development alone, is the primary driver of employment structural upgrading in China.}
+\enkeywords{Digital Economy; Employment Structure; Panel Threshold Model; Regional Heterogeneity}
+\jel{JEL Classification: J21; O33; R23}
+
+\begin{document}
+
+% ===== 中文标题页 =====
+\maketitle
+
+\begin{abstract}
+本文利用 2011--2023 年中国 31 个省份面板数据，以自建数字经济综合指数为核心解释变量，采用双向固定效应模型和 Hansen（1999）面板门槛模型，实证检验数字经济发展对省际就业结构的影响。研究发现：（1）数字经济发展显著提升了第三产业就业占比，在控制省份和年份双向固定效应后，数字经济指数每提高 1 个单位，三产就业占比提高约 0.28 个单位，且该结果在 6 种渐进控制规格和 5 项稳健性检验下保持稳健；（2）数字经济的就业结构效应存在区域异质性，中部地区的边际效应最大（$\beta=1.781$），东部次之（$\beta=0.304$），西部不显著；（3）广义数字经济综合指数对就业结构的影响强于狭义数字金融指数，后者在双向固定效应下不显著。本文的边际贡献在于将数字经济就业效应研究的观测窗口延长至 2023 年，并从门槛效应视角提供了城镇化调节作用的初步证据。
+
+\keywords{数字经济；就业结构；面板门槛模型；区域异质性；双向固定效应}
+\end{abstract}
+
+% ===== 正文 =====
+\input{sections/01_introduction}
+\input{sections/02_literature}
+\input{sections/03_model}
+\input{sections/04_empirical_results}
+\input{sections/05_robustness}
+\input{sections/06_conclusion}
+
+% ===== 参考文献 =====
+\erjref
+\printbibliography[heading=none]
+
+% ===== 英文标题页 =====
+\enmaketitle
+
+\end{document}
