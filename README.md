@@ -17,6 +17,78 @@
 
 **核心原则**：技术操作全部自动执行，但任何涉及研究决策的节点均可请求用户介入。AI 负责执行、检索、编码、生成；用户负责方向判断、关键决策、最终审阅。
 
+```mermaid
+flowchart TB
+    subgraph Human["用户决策层"]
+        direction LR
+        H1[方向判断]
+        H2[关键确认]
+        H3[最终审阅]
+    end
+
+    subgraph AI["AI 执行层"]
+        A1[选题推演]
+        A2[文献检索]
+        A3[数据脚本]
+        A4[Stata .do 生成]
+        A5[LaTeX 撰写]
+    end
+
+    subgraph Pipeline["工作流管线"]
+        direction LR
+        P1["① 选题研究<br/>5W1H→Gap→SMART"]
+        P2["② 文献综述<br/>检索→摘要→编译"]
+        P3["③ 数据获取与清洗<br/>Python 脚本"]
+        P4["④ Stata 实证<br/>FE → Threshold"]
+        P5["⑤ 稳健性检验<br/>6 项检验"]
+        P6["⑥ 结论验证<br/>假设 vs 结果"]
+        P7["⑦ LaTeX 论文<br/>XeLaTeX 编译"]
+    end
+
+    subgraph Tools["工具链"]
+        T1[Python 3.12<br/>pandas / requests]
+        T2[StataMP 18<br/>reghdfe / xtreg]
+        T3[TeX Live<br/>XeLaTeX / biber]
+        T4[MCP 协议<br/>stata-mcp / paper-search-mcp]
+    end
+
+    subgraph Data["数据层"]
+        D1["原始数据<br/>data/raw/"]
+        D2["清洗数据<br/>data/clean/"]
+        D3["回归结果<br/>analysis/output/"]
+    end
+
+    H1 -.->|确认方向| A1
+    H2 -.->|确认模型| A4
+    H3 -.->|审阅定稿| A5
+
+    A1 --> P1
+    P1 --> P2
+    A2 --> P2
+    P2 --> P3
+    A3 --> P3
+    P3 --> P4
+    A4 --> P4
+    P4 --> P5
+    P5 --> P6
+    P6 --> P7
+    A5 --> P7
+
+    P3 <--> D1
+    D1 --> D2
+    D2 --> P4
+    P4 --> D3
+    D3 --> P5
+
+    T4 -.->|驱动| T1
+    T4 -.->|驱动| T2
+
+    style Human fill:#e1f5fe,stroke:#0288d1
+    style AI fill:#f3e5f5,stroke:#7b1fa2
+    style Tools fill:#fff3e0,stroke:#e65100
+    style Data fill:#e8f5e9,stroke:#2e7d32
+```
+
 ---
 
 ## 当前论文
