@@ -1,0 +1,5 @@
+{
+  "SessionStart": {
+    "hook": "scripts/announce-plugin-loaded.sh"
+  }
+}

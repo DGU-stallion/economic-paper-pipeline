@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "project_name": "demo-paper",
+  "created_at": "2026-05-15T23:43:22.635933",
+  "updated_at": "2026-05-15T23:43:57.764511",
+  "current_state": {
+    "stage": "topic",
+    "substage": "5w1h",
+    "step": "why",
+    "last_interaction": "2026-05-15T23:43:57.764511",
+    "conversation_topic": "5W1H 头脑风暴 - Why 维度"
+  },
+  "messages": [
+    {
+      "id": "555f1084-5687-4610-81a9-50579a73a332",
+      "role": "user",
+      "content": "我想研究数字经济对就业的影响",
+      "timestamp": "2026-05-15T23:43:39.621048",
+      "stage": "topic",
+      "substage": "5w1h",
+      "metadata": {}
+    },
+    {
+      "id": "89d922e8-535a-4816-84c0-8ffd39f95662",
+      "role": "agent",
+      "content": "好的，让我们用 5W1H 框架来梳理这个选题。先从 What 维度开始：核心经济现象是什么？",
+      "timestamp": "2026-05-15T23:43:39.621048",
+      "stage": "topic",
+      "substage": "5w1h",
+      "metadata": {}
+    },
+    {
+      "id": "5954eebb-c6e2-4d52-84ef-24f06bc024ec",
+      "role": "user",
+      "content": "我想研究数字技术如何影响中国制造业企业的就业结构",
+      "timestamp": "2026-05-15T23:43:39.621048",
+      "stage": "topic",
+      "substage": "5w1h",
+      "metadata": {}
+    },
+    {
+      "id": "24bf8583-ccb7-44cc-b957-20255f216860",
+      "role": "agent",
+      "content": "很好，这是一个很有价值的研究方向。让我们继续 Why 维度：为什么这个问题重要？",
+      "timestamp": "2026-05-15T23:43:39.621048",
+      "stage": "topic",
+      "substage": "5w1h",
+      "metadata": {}
+    }
+  ],
+  "decisions": [
+    {
+      "id": "0997c76e-a21b-4977-a038-da4b06dbc25d",
+      "decision": "研究方向确定为数字经济对制造业就业的影响",
+      "category": "research_topic",
+      "confirmed": true,
+      "confirmed_at": "2026-05-15T23:43:39.621048",
+      "context": "用户明确表示关注数字经济与就业的关系"
+    }
+  ],
+  "preferences": {
+    "output_format": "detailed",
+    "interaction_style": "collaborative",
+    "preferred_language": "zh-CN",
+    "auto_advance": false,
+    "table_format": "latex"
+  },
+  "context_summary": {
+    "last_summary": "完成了 5W1H 的 What 维度讨论，确定研究数字技术对中国制造业企业就业结构的影响。已完成 1 条决策确认。",
+    "next_action": "继续 Why 维度的讨论：为什么这个研究问题重要？理论贡献和政策含义是什么？"
+  }
+}

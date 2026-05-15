@@ -1,23 +1,31 @@
 # ========================
-# Data
+# Data (all projects)
 # ========================
-data/raw/*
-!data/raw/.gitkeep
-data/clean/*
-!data/clean/.gitkeep
+papers/*/data/raw/*
+!papers/*/data/raw/.gitkeep
+papers/*/data/clean/*
+!papers/*/data/clean/.gitkeep
+
+templates/data/raw/*
+!templates/data/raw/.gitkeep
+templates/data/clean/*
+!templates/data/clean/.gitkeep
 
 # ========================
 # Stata outputs and logs
 # ========================
-analysis/logs/*.log
-analysis/logs/*.smcl
-analysis/logs/*.dta
-
-# Root-level Stata batch logs
-stata_batch__*.log
+papers/*/analysis/logs/*.log
+papers/*/analysis/logs/*.smcl
+papers/*/analysis/logs/*.dta
 
 # ========================
-# MCP working directories
+# Root-level temporary logs (cleaned up, but just in case)
+# ========================
+stata_batch__*.log
+doctor_test.log
+
+# ========================
+# MCP working directories (machine-local)
 # ========================
 .statamcp/
 .playwright-mcp/
@@ -49,36 +57,47 @@ Thumbs.db
 .claude/
 
 # ========================
-# Pipeline state (machine-local checkpoint)
+# Pipeline state (machine-local, per project)
 # ========================
-pipeline_state.json
+config/current_project.json
+papers/*/pipeline_state.json
+current_project.json  # legacy, was in root
 
 # ========================
-# Diagnostics
+# Other MCP working directories
 # ========================
-doctor_test.log
+.understand-anything/
 
 # ========================
-# LaTeX build artifacts
+# LaTeX build artifacts (all projects)
 # ========================
-*.aux
-*.bbl
-*.bcf
-*.blg
-*.fdb_latexmk
-*.fls
-*.out
-*.run.xml
-*.synctex.gz
-*.toc
-*.lof
-*.lot
-*.nlo
-*.nls
-*.brf
-*.nav
-*.snm
-*.vrb
+papers/*/paper/*.aux
+papers/*/paper/*.bbl
+papers/*/paper/*.bcf
+papers/*/paper/*.blg
+papers/*/paper/*.fdb_latexmk
+papers/*/paper/*.fls
+papers/*/paper/*.out
+papers/*/paper/*.run.xml
+papers/*/paper/*.synctex.gz
+papers/*/paper/*.toc
+papers/*/paper/*.lof
+papers/*/paper/*.lot
+papers/*/paper/*.nlo
+papers/*/paper/*.nls
+papers/*/paper/*.brf
+papers/*/paper/*.nav
+papers/*/paper/*.snm
+papers/*/paper/*.vrb
 
-# Compiled PDF (source of truth is local compile)
-paper/main.pdf
+# Compiled PDF (all projects - source of truth is local compile)
+papers/*/paper/main.pdf
+
+# Template LaTeX artifacts
+templates/paper/*.aux
+templates/paper/main.pdf
+
+# ========================
+# Archive (optional: archived projects not tracked in git)
+# ========================
+archive/

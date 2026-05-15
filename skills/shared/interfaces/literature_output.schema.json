@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "文献综述 Skill 输出 Schema",
+  "description": "skill-literature 完成后传递给后续 Skill 的标准数据格式",
+  "type": "object",
+  "required": ["status", "stage", "literature_summary", "artifacts", "next_skill"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["completed", "partial", "needs_review", "error"],
+      "description": "执行状态"
+    },
+    "stage": {
+      "type": "string",
+      "const": "literature",
+      "description": "阶段标识"
+    },
+    "literature_summary": {
+      "type": "object",
+      "properties": {
+        "total_papers": { "type": "integer", "minimum": 0 },
+        "core_papers": { "type": "integer", "minimum": 0 },
+        "chinese_papers": { "type": "integer", "minimum": 0 },
+        "recent_papers_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "key_findings": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "research_gaps": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "review_sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "section_title": { "type": "string" },
+              "content": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "references_stats": {
+      "type": "object",
+      "properties": {
+        "total_refs": { "type": "integer" },
+        "chinese_refs": { "type": "integer" },
+        "english_refs": { "type": "integer" },
+        "recent_refs": { "type": "integer" },
+        "recent_ratio": { "type": "number" },
+        "bilingual_ok": { "type": "boolean" },
+        "recency_ok": { "type": "boolean" }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "生成的文件路径列表"
+    },
+    "next_skill": {
+      "type": "string",
+      "const": "skill-stata",
+      "description": "下一个要激活的 Skill"
+    },
+    "needs_user_input": {
+      "type": "object",
+      "description": "需要用户补充的信息",
+      "properties": {
+        "missing_chinese": { "type": "boolean" },
+        "missing_recent": { "type": "boolean" },
+        "papers_to_add": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "error_message": {
+      "type": "string",
+      "description": "错误信息"
+    }
+  }
+}

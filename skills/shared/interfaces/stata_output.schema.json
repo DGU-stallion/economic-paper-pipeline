@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Stata 实证 Skill 输出 Schema",
+  "description": "skill-stata 完成后传递给后续 Skill 的标准数据格式",
+  "type": "object",
+  "required": ["status", "stage", "empirical_results", "artifacts", "next_skill"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["completed", "partial", "needs_data", "needs_review", "error"],
+      "description": "执行状态"
+    },
+    "stage": {
+      "type": "string",
+      "const": "stata",
+      "description": "阶段标识（含数据、稳健性、结论）"
+    },
+    "empirical_results": {
+      "type": "object",
+      "properties": {
+        "data_summary": {
+          "type": "object",
+          "properties": {
+            "final_n_obs": { "type": "integer" },
+            "n_individuals": { "type": "integer" },
+            "n_periods": { "type": "integer" },
+            "balanced_panel": { "type": "boolean" },
+            "variables_count": { "type": "integer" }
+          }
+        },
+        "baseline": {
+          "type": "object",
+          "properties": {
+            "y_var": { "type": "string" },
+            "d_var": { "type": "string" },
+            "main_coef": { "type": "number" },
+            "std_error": { "type": "number" },
+            "t_stat": { "type": "number" },
+            "p_value": { "type": "number" },
+            "significance": { "type": "string", "enum": ["1%", "5%", "10%", ""] },
+            "expected_sign_matches": { "type": "boolean" },
+            "n_obs": { "type": "integer" },
+            "r_squared": { "type": "number" },
+            "model_spec": { "type": "string" }
+          }
+        },
+        "robustness": {
+          "type": "object",
+          "properties": {
+            "checks_passed": { "type": "integer" },
+            "checks_total": { "type": "integer" },
+            "pass_rate": { "type": "number" },
+            "failed_checks": { "type": "array", "items": { "type": "string" } },
+            "details": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "check_name": { "type": "string" },
+                  "coef": { "type": "number" },
+                  "significance": { "type": "string" },
+                  "passed": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "heterogeneity": {
+          "type": "object",
+          "properties": {
+            "dimensions_tested": { "type": "array", "items": { "type": "string" } },
+            "findings": { "type": "array", "items": { "type": "string" } },
+            "details": { "type": "array" }
+          }
+        },
+        "mechanism": {
+          "type": "object",
+          "properties": {
+            "tested": { "type": "boolean" },
+            "channels": { "type": "array", "items": { "type": "string" } },
+            "findings": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "conclusion": {
+          "type": "string",
+          "description": "假设验证结论摘要"
+        },
+        "hypothesis_validation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hypothesis_id": { "type": "string" },
+              "expected_sign": { "type": "string" },
+              "empirical_result": { "type": "string" },
+              "is_supported": { "type": "boolean" },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "path": { "type": "string" },
+              "caption": { "type": "string" },
+              "target_section": { "type": "string" }
+            }
+          }
+        },
+        "figures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "path": { "type": "string" },
+              "caption": { "type": "string" },
+              "target_section": { "type": "string" }
+            }
+          }
+        },
+        "logs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "next_skill": {
+      "type": "string",
+      "const": "skill-latex",
+      "description": "下一个要激活的 Skill"
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "需要用户注意的问题（系数不显著、符号相反等）"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "错误信息"
+    }
+  }
+}

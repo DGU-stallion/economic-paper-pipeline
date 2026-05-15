@@ -1,0 +1,21 @@
+{
+  "name": "economic-paper-pipeline",
+  "version": "2.0.0",
+  "description": "经济学实证论文自动化工作流 — 纯对话式 AI 协作工具，覆盖选题、文献综述、Stata 实证、稳健性检验、LaTeX 论文撰写全流程",
+  "author": {
+    "name": "DGU-stallion"
+  },
+  "homepage": "https://github.com/DGU-stallion/economic-paper-pipeline",
+  "repository": "https://github.com/DGU-stallion/economic-paper-pipeline",
+  "license": "MIT",
+  "keywords": [
+    "economics",
+    "econometrics",
+    "stata",
+    "latex",
+    "academic-research",
+    "paper-writing",
+    "empirical-analysis",
+    "chinese-economics"
+  ]
+}
