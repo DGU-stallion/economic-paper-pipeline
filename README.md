@@ -14,11 +14,34 @@
 - [Claude Code](https://claude.ai/install.sh)（最新版）
 - 可选：StataMP 18（用于实证回归）、TeX Live（用于本地 LaTeX 编译）
 
-### 一行安装
+---
+
+### 安装方式一：全局安装（推荐）
+
+作为 Claude Code 全局插件安装，任何目录下都可使用：
+
 ```text
 /plugin marketplace add DGU-stallion/economic-paper-pipeline
 /plugin install economic-paper-pipeline
 ```
+
+**文件存放**：论文项目创建在你**启动 Claude Code 时的目录**下的 `papers/` 文件夹。
+
+---
+
+### 安装方式二：本地开发模式
+
+直接克隆仓库，在项目目录内启动 Claude Code，自动识别为本地插件：
+
+```bash
+git clone https://github.com/DGU-stallion/economic-paper-pipeline.git
+cd economic-paper-pipeline
+claude .  # 在项目目录内启动 Claude Code
+```
+
+**文件存放**：论文项目创建在仓库根目录的 `papers/` 文件夹内。
+
+---
 
 ### 验证是否成功
 输入 `/econ-help`，能看到命令列表即安装成功。
