@@ -26,9 +26,13 @@ read_json_field() {
 }
 
 # ---- Paths ----
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-CONFIG_FILE="$ROOT/config/current_project.json"
-PIPELINE="$ROOT/scripts/pipeline.py"
+# 插件安装目录（脚本自身位置，用于找到 pipeline.py）
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PIPELINE="$PLUGIN_ROOT/scripts/pipeline.py"
+
+# 用户工作目录（论文项目和配置创建于此）
+WORKING_DIR="$(pwd)"
+CONFIG_FILE="$WORKING_DIR/.config/current_project.json"
 
 # ---- startup / clear: full welcome ----
 if [ "$SOURCE" = "startup" ] || [ "$SOURCE" = "clear" ]; then
@@ -69,7 +73,7 @@ else
   if [ -f "$CONFIG_FILE" ]; then
     PROJECT_NAME=$(read_json_field "$CONFIG_FILE" "current_project")
     if [ -n "$PROJECT_NAME" ]; then
-      STATE_FILE="$ROOT/papers/$PROJECT_NAME/pipeline_state.json"
+      STATE_FILE="$WORKING_DIR/papers/$PROJECT_NAME/pipeline_state.json"
       if [ -f "$STATE_FILE" ]; then
         STATE_ID=$(read_json_field "$STATE_FILE" "current_micro_state")
         if [ -n "$STATE_ID" ]; then

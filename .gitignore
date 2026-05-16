@@ -60,6 +60,7 @@ Thumbs.db
 # Pipeline state (machine-local, per project)
 # ========================
 config/current_project.json
+.config/               # global installation mode config
 papers/*/pipeline_state.json
 current_project.json  # legacy, was in root
 

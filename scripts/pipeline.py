@@ -2,6 +2,12 @@
 """
 经济学实证论文自动化工作流 - 微状态机实现
 支持 28 个微状态的精细状态管理，多项目切换
+
+路径设计（支持插件全局安装）：
+- PLUGIN_ROOT：插件安装目录（内置模板、脚本）
+- WORKING_DIR：用户当前工作目录（论文项目创建于此）
+- PAPERS_DIR：WORKING_DIR/papers（用户论文存放位置）
+- CONFIG_DIR：WORKING_DIR/.config（当前项目配置）
 """
 
 import json
@@ -17,11 +23,16 @@ try:
 except ImportError:
     MEMORY_AVAILABLE = False
 
-ROOT = Path(__file__).parent.parent
-CURRENT_PROJECT_FILE = ROOT / "config" / "current_project.json"
-PAPERS_DIR = ROOT / "papers"
-TEMPLATES_DIR = ROOT / "templates"
+# 插件根目录（内置模板、脚本，只读）
+PLUGIN_ROOT = Path(__file__).parent.parent
+TEMPLATES_DIR = PLUGIN_ROOT / "templates"
 PAPER_TEMPLATES_DIR = TEMPLATES_DIR / "paper"
+
+# 用户工作目录（论文项目创建于此）
+WORKING_DIR = Path.cwd()
+PAPERS_DIR = WORKING_DIR / "papers"
+CONFIG_DIR = WORKING_DIR / ".config"
+CURRENT_PROJECT_FILE = CONFIG_DIR / "current_project.json"
 
 # ============================================================
 # 微状态定义 (共 28 个)
@@ -441,6 +452,7 @@ def set_current_project(project_name, show_resume=True):
         print(f"错误: 项目 '{project_name}' 不存在")
         return False
 
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     with open(CURRENT_PROJECT_FILE, "w", encoding="utf-8") as f:
         json.dump({"current_project": project_name}, f, ensure_ascii=False, indent=2)
     print(f"已切换到项目: {project_name}")
@@ -500,6 +512,7 @@ def cmd_new(args):
         print(f"错误: 模板目录不存在: {TEMPLATES_DIR}")
         return
 
+    PAPERS_DIR.mkdir(parents=True, exist_ok=True)
     print(f"正在创建新项目: {project_name}...")
     shutil.copytree(TEMPLATES_DIR, project_path)
 
