@@ -74,25 +74,16 @@ economic-paper-pipeline/         # Plugin 根目录
 | 命令 | 操作 | 等价 NLU |
 |------|------|---------|
 | `/econ-help` | 列出所有命令 | "能做什么" |
-| `/econ-status` | 查看当前项目进度 | "进展到哪了" |
-| `/econ-list` | 列出所有论文项目 | "我有哪些项目" |
-| `/econ-use <name>` | 切换到指定项目 | "切换到XX论文" |
 | `/econ-new <name>` | 创建新项目 | "创建一篇新论文" |
+| `/econ-use <name>` | 切换到指定项目 | "切换到XX论文" |
+| `/econ-list` | 列出所有论文项目 | "我有哪些项目" |
+| `/econ-status` | 查看当前项目进度 | "进展到哪了" |
 | `/econ-advance` | 推进到下一阶段 | "下一步" |
+| `/econ-paper` | 生成 LaTeX 论文 | "写论文" |
+| `/econ-compile` | 编译 LaTeX | "编译" |
 | `/econ-reset` | 重置当前项目（需确认） | "从头开始" |
 
-### 阶段跳转
-
-| 命令 | 进入阶段 | 等价 NLU |
-|------|---------|---------|
-| `/econ-topic` | 选题研究 | "先做选题" |
-| `/econ-literature` | 文献综述 | "搜文献" |
-| `/econ-data` | 数据清洗 | "处理数据" |
-| `/econ-stata` | Stata 实证 | "跑回归" |
-| `/econ-robustness` | 稳健性检验 | "做稳健性" |
-| `/econ-conclusion` | 结论验证 | "验证结论" |
-| `/econ-paper` | LaTeX 论文 | "写论文" |
-| `/econ-compile` | 编译 LaTeX | "编译" |
+**设计原则**：阶段跳转（选题/文献/数据/实证/稳健性等）**通过自然语言处理**，不设专门命令。
 
 ### 执行规则
 

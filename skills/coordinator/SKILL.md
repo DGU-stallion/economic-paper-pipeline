@@ -62,20 +62,16 @@ latex     → LaTeX 论文撰写与编译
 | 命令 | 等价 NLU | 执行操作 |
 |------|---------|---------|
 | `/econ-help` | "能做什么" | 显示所有命令列表 |
-| `/econ-status` | "当前状态" | `scripts/pipeline.py status` |
-| `/econ-list` | "有哪些项目" | `scripts/pipeline.py list` |
-| `/econ-use <名称>` | "切换到XX" | `scripts/pipeline.py use <名称>` |
-| `/econ-topic` | "做选题" | `scripts/pipeline.py jump topic` |
-| `/econ-literature` | "搜文献" | `scripts/pipeline.py jump literature` |
-| `/econ-data` | "处理数据" | `scripts/pipeline.py jump data` |
-| `/econ-stata` | "跑回归" | `scripts/pipeline.py jump stata` |
-| `/econ-robustness` | "做稳健性" | `scripts/pipeline.py jump robustness` |
-| `/econ-conclusion` | "验证结论" | `scripts/pipeline.py jump conclusion` |
-| `/econ-paper` | "写论文" | `scripts/pipeline.py jump paper` |
-| `/econ-advance` | "下一步" | `scripts/pipeline.py advance` |
-| `/econ-reset` | "重置项目" | `scripts/pipeline.py reset`（需二次确认） |
 | `/econ-new <名称>` | "创建项目" | `scripts/pipeline.py new <名称>` |
+| `/econ-use <名称>` | "切换到XX" | `scripts/pipeline.py use <名称>` |
+| `/econ-list` | "有哪些项目" | `scripts/pipeline.py list` |
+| `/econ-status` | "当前状态" | `scripts/pipeline.py status` |
+| `/econ-advance` | "下一步" | `scripts/pipeline.py advance` |
+| `/econ-paper` | "写论文" | `scripts/pipeline.py jump paper` |
 | `/econ-compile` | "编译论文" | 本地 LaTeX 编译 |
+| `/econ-reset` | "重置项目" | `scripts/pipeline.py reset`（需二次确认） |
+
+**设计原则：阶段跳转（选题/文献/数据/实证等）**通过自然语言**处理，不设专门命令。**
 
 **执行顺序：先匹配 `/econ-*` 命令（精确），再匹配 NLU（模糊）。匹配失败时不报错，自动降级到 NLU。**
 

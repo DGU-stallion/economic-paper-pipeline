@@ -66,18 +66,13 @@
 economic-paper-pipeline/
 ├── .claude-plugin/
 │   └── plugin.json              # 插件清单（Plugin 入口）
-├── commands/                    # /econ-* 斜杠命令（共 15 个）
+├── commands/                    # /econ-* 斜杠命令（共 9 个，核心操作）
 │   ├── econ-help.md
 │   ├── econ-status.md
 │   ├── econ-new.md
 │   ├── econ-use.md
 │   ├── econ-list.md
-│   ├── econ-topic.md
-│   ├── econ-literature.md
-│   ├── econ-data.md
-│   ├── econ-stata.md
-│   ├── econ-robustness.md
-│   ├── econ-conclusion.md
+│   ├── econ-paper.md
 │   ├── econ-paper.md
 │   ├── econ-advance.md
 │   ├── econ-reset.md
@@ -103,6 +98,51 @@ economic-paper-pipeline/
 ├── templates/                   # 论文模板
 └── docs/                        # 文档
 ```
+
+---
+
+## 📦 使用自有数据与模板
+
+### 自定义数据放置
+
+将你的数据文件放入项目的 `data/raw/` 目录：
+
+```
+papers/你的项目/
+└── data/
+    ├── raw/                    ✅ 放这里，支持 .dta/.csv/.xlsx
+    │   ├── 面板数据_2025.dta
+    │   └── 宏观控制变量.csv
+    ├── clean/                  ← 清洗后输出
+    └── scripts/                ← 清洗脚本（自动生成）
+```
+
+**告诉 Agent 使用你的数据**：
+> "使用 `data/raw/面板数据_2025.dta` 作为主数据"
+> "核心解释变量是 `digital`，被解释变量是 `emp_tertiary`"
+
+### 自定义 LaTeX 模板
+
+将你的 `.cls` 文档类文件放入项目的 `paper/` 目录，并在项目创建时指定：
+
+```
+papers/你的项目/
+└── paper/
+    ├── 期刊投稿.cls            ✅ 放你的模板
+    ├── main.tex                ← 自动生成时引用你的模板
+    ├── sections/
+    └── ...
+```
+
+**告诉 Agent 使用你的模板**：
+> "创建新项目时使用 `paper/经济研究.cls` 作为文档类"
+> "参考文献格式按 GB/T 7714-2015 顺序编码制"
+
+### 覆盖全局模板
+
+如果你想为所有新项目使用自定义模板，替换根目录：
+- `templates/paper/chinese-erj.cls` — 默认文档类
+- `templates/paper/main.tex` — 默认主文档结构
 
 ---
 
