@@ -93,6 +93,33 @@ required_mcp: [stata-mcp]
 
 ## 工作流程
 
+### Step 0: 读取上下文（强制执行）
+
+⚠️ **每次进入 Stata Skill 时必须先执行以下操作**，不可跳过：
+
+1. **读取 project_config.json**（获取变量映射）
+   ```bash
+   python scripts/pipeline.py get-context
+   ```
+   或直接读取 `papers/<项目>/project_config.json`，获取：
+   - `variables.Y.varname` — 被解释变量名
+   - `variables.D.varname` — 核心解释变量名
+   - `variables.X.varname` — 控制变量名列表
+   - `variables.ID.varname` / `variables.YEAR.varname`
+   - `model.cluster_level` — 标准误聚类层级
+
+2. **读取 context_store.topic**（获取研究设计）
+   从 `pipeline_state.json` 的 `context_store.topic` 获取：
+   - 研究问题、假设、识别策略
+   - 如果 context_store 为空，必须先向用户确认变量名
+
+3. **读取 context_store.stata**（如有，恢复断点）
+   如果存在，说明已完成部分实证工作，从断点恢复
+
+**禁止**：在未读取 project_config.json 的情况下用硬编码变量名生成 do-file。
+
+---
+
 ### Stage 3: 数据获取与清洗
 
 #### Step 3.1 数据源确认
@@ -225,8 +252,11 @@ required_mcp: [stata-mcp]
 ## Stata 环境要求
 
 - 使用 `stata-mcp` MCP 服务器执行 .do 文件
-- 必需包：`estout`, `outreg2`, `coefplot`, `asdoc`, `xtreg`
-- 首次运行自动检测并安装缺失包
+- **零外部依赖原则**：所有 do-file 仅使用 Stata 内置命令
+  - ✅ 用 `xtreg ..., fe` 替代 `reghdfe`
+  - ✅ 用 `_pctile` 手动缩尾替代 `winsor2`
+  - ✅ 手动计算 Sobel Z 值替代 `sgmediation`
+  - 仅 `estout` 为唯一推荐的 ssc 包（用于表格输出，非必需）
 - 所有 .do 文件 UTF-8 编码
 
 ---

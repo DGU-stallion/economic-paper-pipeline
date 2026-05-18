@@ -1,0 +1,32 @@
+{
+  "search_date": "2026-05-16",
+  "total_found": 40,
+  "english_papers": 30,
+  "chinese_papers": 10,
+  "searches": [
+    {
+      "source": "google_scholar",
+      "query": "digital transformation supply chain resilience firm",
+      "results": 15,
+      "relevance": "high"
+    },
+    {
+      "source": "google_scholar",
+      "query": "digitization supply chain disruption mechanism causal identification",
+      "results": 15,
+      "relevance": "high"
+    },
+    {
+      "source": "arxiv",
+      "query": "digital transformation supply chain resilience",
+      "results": 0,
+      "relevance": "n/a"
+    },
+    {
+      "source": "google_scholar",
+      "query": "数字化转型 供应链韧性 企业 实证",
+      "results": 10,
+      "relevance": "high"
+    }
+  ]
+}

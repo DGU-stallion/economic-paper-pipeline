@@ -1,0 +1,18 @@
+\begin{table}[htbp]\centering\small
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Heterogeneity Analysis}
+\begin{tabular}{l*{6}{c}}
+\hline\hline
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+            &\multicolumn{1}{c}{大规模}&\multicolumn{1}{c}{小规模}&\multicolumn{1}{c}{疫情前}&\multicolumn{1}{c}{疫情后}&\multicolumn{1}{c}{高杠杆}&\multicolumn{1}{c}{低杠杆}\\
+\hline
+dt          &       0.002\sym{*}  &       0.001\sym{**} &       0.001         &       0.001         &       0.002\sym{**} &       0.001         \\
+            &     (0.001)         &     (0.001)         &     (0.001)         &     (0.001)         &     (0.001)         &     (0.001)         \\
+\hline
+Observations&       13755         &       13755         &       11017         &       16493         &       13753         &       13757         \\
+Within R²   &       0.028         &       0.050         &       0.032         &       0.019         &       0.025         &       0.040         \\
+\hline\hline
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

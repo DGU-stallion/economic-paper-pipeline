@@ -1,0 +1,42 @@
+% ============================================================
+% 西南财经大学 工作论文
+% 企业数字化转型对供应链韧性的影响研究
+% 编译: xelatex -> biber -> xelatex -> xelatex
+% ============================================================
+\documentclass{chinese-erj}
+\usepackage{booktabs}
+\usepackage{placeins}
+
+% ---- 论文元信息 ----
+\title{企业数字化转型对供应链韧性的影响：\\基于中国A股上市公司的实证研究}
+\author{杨文龙 \quad 杨孝宇 \quad 苏国熹}
+\header{企业数字化转型对供应链韧性的影响}
+
+
+\begin{document}
+
+% ===== 中文标题页 =====
+\maketitle
+
+\begin{abstract}
+在全球供应链面临疫情、地缘政治与极端气候三重冲击的背景下，企业数字化转型能否提升供应链韧性是一个具有重要理论与政策意义的研究问题。本文基于2015—2024年中国A股上市公司面板数据，采用双向固定效应模型实证检验了数字化转型对供应链韧性的影响及其传导机制。研究发现：（1）数字化转型对供应链韧性具有显著的正向影响，该结论在滞后解释变量和替代被解释变量度量下保持稳健；（2）疫情后数字化转型的供应链韧性提升效应更为显著（交互项系数为0.0016，p$<$0.01）；（3）该效应在高杠杆企业和中小企业中更为突出；（4）流程优化度、企业创新能力和信息共享水平三条理论上的传导路径均未通过中介效应检验，提示数字化转型对供应链韧性的正向效应可能通过直接路径而非间接路径实现。本文为理解数字经济时代下的供应链安全提供了微观经验证据，也为企业数字化投入的靶向性提供了决策参考。
+
+\keywords{数字化转型；供应链韧性；双向固定效应；中介效应；异质性分析}
+\end{abstract}
+
+% ===== 正文 =====
+\input{sections/01_introduction.tex}
+\input{sections/02_literature.tex}
+\input{sections/03_model.tex}
+\input{sections/04_empirical_results.tex}
+\input{sections/05_conclusion.tex}
+
+% ===== 参考文献 =====
+\clearpage
+\erjref
+\printbibliography[heading=none]
+
+% ===== 封底 =====
+\swufeback
+
+\end{document}

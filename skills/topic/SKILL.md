@@ -106,6 +106,30 @@ required_mcp: []
 
 自动生成完整研究方案到 `topics/00_research_proposal.md`，让用户确认后通知协调器切换到 `literature`。
 
+**⚠️ 确认后必须执行以下操作将产出持久化到 context_store：**
+
+```bash
+# 写入核心变量
+python ../scripts/pipeline.py set-context topic research_question "研究问题一句话"
+python ../scripts/pipeline.py set-context topic y_var "变量名"
+python ../scripts/pipeline.py set-context topic d_var "变量名"
+python ../scripts/pipeline.py set-context topic y_label "中文标签"
+python ../scripts/pipeline.py set-context topic d_label "中文标签"
+python ../scripts/pipeline.py set-context topic control_vars "v1 v2 v3"
+python ../scripts/pipeline.py set-context topic identification "FE/DID/IV"
+python ../scripts/pipeline.py set-context topic id_var "企业ID变量"
+python ../scripts/pipeline.py set-context topic year_var "年份变量"
+
+# 写入中介变量（如有）
+python ../scripts/pipeline.py set-context topic m1_var "中介变量1"
+python ../scripts/pipeline.py set-context topic m2_var "中介变量2"
+
+# 初始化项目配置（生成 project_config.json）
+python ../scripts/pipeline.py init-config
+```
+
+这样后续的 literature/stata/latex Skill 都可以直接从 context_store 获取变量映射，无需重新询问用户。
+
 ---
 
 ## 人机协作点

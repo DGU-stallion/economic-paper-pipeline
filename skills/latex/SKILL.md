@@ -78,6 +78,31 @@ required_mcp: []
 
 ## 工作流程
 
+### Step 0: 读取上下文（强制执行）
+
+⚠️ **每次进入 LaTeX Skill 时必须先执行**，不可跳过：
+
+1. **读取 context_store**（获取所有上游阶段产出）
+   ```bash
+   python scripts/pipeline.py get-context
+   ```
+   从 `pipeline_state.json` 的 `context_store` 获取：
+   - `topic`: 研究问题、标题、变量名 → 用于引言和摘要
+   - `literature`: 核心文献列表 → 用于文献综述章节
+   - `stata`: 回归系数、显著性、输出表格路径 → 用于实证结果章节
+   - `data`: 样本描述 → 用于数据和变量章节
+
+2. **读取 project_config.json**（获取完整变量定义）
+   - 变量中文标签 → 用于表格标题和正文引用
+
+3. **读取 context/<stage>.md**（获取当前阶段上下文）
+   - 了解哪些表格已生成、哪些需要引用
+
+**禁止**：未读取 context_store 就从头生成章节内容。
+**禁止**：使用对话历史中的模糊记忆替代结构化上下文。
+
+---
+
 ### Step 1: 模板选择与初始化
 
 #### 模板库

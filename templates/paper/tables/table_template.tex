@@ -1,0 +1,58 @@
+% ============================================
+% LaTeX 表格模板 (解决浮动体问题)
+% ============================================
+
+% ---------- 方法1: 非浮动表格（不会抢编号）----------
+% 适用于变量定义表、简单统计表
+\begin{center}
+\captionof{table}{表格标题}
+\small
+\begin{tabular}{lccccc}
+\toprule
+变量 & 均值 & 标准差 & 最小值 & 最大值 & 观测值 \\
+\midrule
+变量1 & 0.123 & 0.456 & -2.34 & 3.45 & 1000 \\
+变量2 & 1.234 & 2.345 & 0.00 & 10.0 & 1000 \\
+\bottomrule
+\end{tabular}
+\label{tab:descriptive}
+\end{center}
+
+% ---------- 方法2: 浮动体表格（esttab输出用）----------
+% 适用于回归结果表
+\begin{table}[htbp]
+\centering
+\caption{回归结果表}
+\footnotesize
+\input{../analysis/output/regression_table.tex}
+\label{tab:baseline}
+\end{table}
+
+% ---------- 方法3: 宽表优化（6列以上）----------
+\begin{table}[htbp]
+\centering
+\caption{宽表示例（自动调整字号）}
+\scriptsize  % 对于7列以上使用 \scriptsize
+\setlength{\tabcolsep}{4pt}  % 减少列间距
+\begin{tabular}{lccccccc}
+\toprule
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) \\
+变量 & 系数 & 系数 & 系数 & 系数 & 系数 & 系数 & 系数 \\
+\midrule
+X & 0.123*** & 0.123** & 0.123* & 0.123 & 0.123*** & 0.123** & 0.123* \\
+  & (0.012) & (0.023) & (0.067) & (0.123) & (0.012) & (0.023) & (0.067) \\
+\bottomrule
+\multicolumn{8}{l}{\footnotesize 注：括号内为聚类稳健标准误；* p<0.1, ** p<0.05, *** p<0.01}
+\end{tabular}
+\label{tab:wide_table}
+\end{table}
+
+% ---------- 重要：浮动体位置控制 ----------
+% 在章节末尾使用 \FloatBarrier 强制输出所有待排表格
+% 需要在导言区添加: \usepackage{placeins}
+%
+% 使用示例：
+% \section{实证结果}
+% 正文内容...
+% \FloatBarrier  % 强制输出本节所有浮动体
+% \section{下一章节}

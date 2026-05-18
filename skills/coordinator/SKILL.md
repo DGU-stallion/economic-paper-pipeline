@@ -45,7 +45,7 @@ latex     → LaTeX 论文撰写与编译
 
 | 用户可能说的话 | 协调器动作 |
 |-------------|----------|
-| "创建新项目"、"我想写一篇关于XXX的论文" | 调用 `scripts/pipeline.py new <name>`，然后路由到 topic |
+| "创建新项目"、"我想写一篇关于XXX的论文"、"开始写新论文"、"开个新项目"、"我有数据和选题方向" | **立刻调用 `scripts/pipeline.py new <自动生成名称或从用户话中提取>`，然后：**<br>1. 显示项目结构树<br>2. 展示完整工作流全景：`选题评审 → 文献综述 → 数据诊断 → 实证分析 → 论文撰写`<br>3. 引导用户选择各环节深度档位（轻量/标准/深度）<br>4. 自动跳入选题评审阶段 |
 | "列出我的论文"、"看看所有项目" | 调用 `scripts/pipeline.py list`，用表格展示 |
 | "切换到XX项目"、"我要写那篇最低工资的论文" | 调用 `scripts/pipeline.py use <name>`，读取状态后路由 |
 | "当前什么状态"、"进展到哪了"、"看看进度" | 调用 `scripts/pipeline.py status`，友好展示 |
@@ -157,7 +157,29 @@ scripts/pipeline.py jump stata
 
 ## 上下文数据结构
 
-`context_store`
+### 四层记忆模型
+
+```
+Tier 1: pipeline_state.json (每次必读, ~200 tokens)
+  → 当前阶段 + 一句话摘要
+  
+Tier 2: project_config.json + context_store (进入项目时加载, ~500 tokens)
+  → 变量映射表 / 假设验证表 / 决策记录 / 实证结果摘要
+
+Tier 3: context/<stage>.md (进入该阶段时才读, ~300 tokens)
+  → 该阶段的完整结构化产出 + 待决策提示
+
+Tier 4: conversation.json (几乎不读, 仅调试用)
+```
+
+### 交互规则
+
+1. **用户说"继续"** → 读 Tier 1 (`pipeline.py status`) + Tier 2 (`pipeline.py get-context`) → 输出分层摘要 → 定位到当前 Skill
+2. **进入新 Skill** → 读 Tier 3 (`context/<stage>.md`) → 获取该阶段上下文
+3. **切换项目** → 读新项目的 Tier 1 + Tier 2 (不读 Tier 4)
+4. **调试/回溯** → 仅在用户要求时读 Tier 4
+
+### context_store 数据结构
 
 每个项目在 `pipeline_state.json` 中维护：
 
@@ -168,21 +190,29 @@ scripts/pipeline.py jump stata
   "history": [],
   "context_store": {
     "topic": {
-      "research_proposal": {},
-      "artifacts": []
+      "research_question": "数字化转型能否提升供应链韧性？",
+      "y_var": "scr",
+      "d_var": "dt",
+      "control_vars": ["lev", "indep", "size", "age", "roa"],
+      "identification": "FE",
+      "hypotheses": [{"id":"H1", "desc":"...", "expected":"+", "result":"✅"}]
     },
     "literature": {
-      "literature_summary": {},
-      "artifacts": []
+      "total_papers": 42,
+      "core_cites": ["wu2025impact", "li2025digital"]
     },
-    "stata": null,
-    "latex": null
+    "stata": {
+      "baseline_coef": 0.0016,
+      "baseline_se": 0.0002,
+      "baseline_sig": "***",
+      "n_obs": 27510,
+      "output_tables": ["t1_summary.tex", "t2_baseline.tex"]
+    }
   },
-  "resume_point": {
-    "skill": "stata",
-    "step": "data_cleaning",
-    "partial_data": {}
-  }
+  "decisions": [
+    {"time": "2026-05-18 10:15", "decision": "使用双向FE+企业聚类SE", "reason": "企业内序列相关"},
+    {"time": "2026-05-18 10:22", "decision": "删除金融行业", "reason": "资产负债表不可比"}
+  ]
 }
 ```
 
