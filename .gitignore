@@ -6,10 +6,12 @@ papers/*/data/raw/*
 papers/*/data/clean/*
 !papers/*/data/clean/.gitkeep
 
-templates/data/raw/*
-!templates/data/raw/.gitkeep
-templates/data/clean/*
-!templates/data/clean/.gitkeep
+# ========================
+# User paper projects (keep only demo-paper in repo)
+# ========================
+papers/*
+!papers/demo-paper/
+!papers/demo-paper/*
 
 # ========================
 # Stata outputs and logs
@@ -17,6 +19,13 @@ templates/data/clean/*
 papers/*/analysis/logs/*.log
 papers/*/analysis/logs/*.smcl
 papers/*/analysis/logs/*.dta
+
+# ========================
+# Pipeline state (machine-local)
+# ========================
+papers/*/pipeline_state.json
+papers/*/conversation.json
+papers/*/context/
 
 # ========================
 # Root-level temporary logs (cleaned up, but just in case)
