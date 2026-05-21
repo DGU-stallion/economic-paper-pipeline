@@ -72,6 +72,12 @@ config/current_project.json
 .config/               # global installation mode config
 papers/*/pipeline_state.json
 current_project.json  # legacy, was in root
+papers/*/.cache/      # incremental execution hash cache
+
+# ========================
+# Unfinished templates (local development)
+# ========================
+templates/paper/swufe-thesis.*
 
 # ========================
 # Other MCP working directories

@@ -30,8 +30,15 @@ literature → 文献检索、综述、参考文献
      ↓
 stata     → 数据清洗、基准回归、稳健性、结论
      ↓
-latex     → LaTeX 论文撰写与编译
+latex     → LaTeX 论文撰写（内置 humanizer-zh 逐节检测）
+     ↓
+humanizer-zh → 全文 AI 痕迹检测与质量报告（最终 QC）
 ```
+
+**humanizer-zh 触发时机：**
+1. **写作中**：LaTeX 每节生成后自动调用（逐节检查）
+2. **完成时**：全文撰写完成后调用一次（最终 QC）
+3. **手动触发**：用户说"检查论文""去 AI 味""质量检测"
 
 ---
 
@@ -54,6 +61,7 @@ latex     → LaTeX 论文撰写与编译
 | "数据都整理好了，帮我跑回归" | 调用 `scripts/pipeline.py jump stata`，进入 stata |
 | "就差写论文了" | 调用 `scripts/pipeline.py jump paper`，进入 latex |
 | "重置这个项目" | 调用 `scripts/pipeline.py reset`，回到 topic |
+| "检查论文"、"去 AI 味"、"质量检测"、"优化论文"、"人性化处理" | 自动进入 `paper-qc` 状态，调用 humanizer-zh 对全文进行 AI 痕迹检测 |
 
 ### 方式二：/econ-* 命令精确触发（用户主动输入）
 
@@ -69,6 +77,7 @@ latex     → LaTeX 论文撰写与编译
 | `/econ-advance` | "下一步" | `scripts/pipeline.py advance` |
 | `/econ-paper` | "写论文" | `scripts/pipeline.py jump paper` |
 | `/econ-compile` | "编译论文" | 本地 LaTeX 编译 |
+| `/econ-qc` | "检查论文" | 调用 humanizer-zh 进行全文 AI 痕迹检测与质量报告 |
 | `/econ-reset` | "重置项目" | `scripts/pipeline.py reset`（需二次确认） |
 
 **设计原则：阶段跳转（选题/文献/数据/实证等）**通过自然语言**处理，不设专门命令。**
@@ -87,6 +96,7 @@ latex     → LaTeX 论文撰写与编译
 • 📋 列出/切换已有论文
 • 📊 引导你完成选题 → 文献 → 数据 → 实证 → 论文的全流程
 • ⚙️ 自动执行 Stata 回归、生成 LaTeX 表格
+• ✨ **新增：自动检测 AI 写作痕迹，去 AI 味优化** (humanizer-zh)
 
 当前项目状态：
 [自动插入 scripts/pipeline.py status 输出]
@@ -267,9 +277,12 @@ latex 接收所有前序 Skill 的输出
 用可视化方式向用户展示工作流进度：
 
 ```
-选题研究 [✅] → 文献综述 [✅] → Stata实证 [>>] → 论文撰写 [  ]
-                          阶段 3/7
+选题研究 [✅] → 文献综述 [✅] → Stata实证 [>>] → 论文撰写 [  ] → 质量检测 [  ]
+                          阶段 3/8
 ```
+
+**阶段说明：**
+1. 选题研究 → 2. 文献综述 → 3. 数据诊断 → 4. Stata实证 → 5. 稳健性检验 → 6. 结论验证 → 7. 论文撰写 → 8. 质量检测
 
 ---
 

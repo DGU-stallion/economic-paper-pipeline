@@ -1,10 +1,12 @@
 ---
 name: "LaTeX 写作 Skill"
-version: "1.0.0"
+version: "1.1.0"
 skill_id: "skill-latex"
-description: "LaTeX 论文模板管理、分章节撰写、表格图片注入、编译输出"
+description: "LaTeX 论文模板管理、分章节撰写、AI 痕迹检测、表格图片注入、编译输出"
 stages_handled: [paper]
 required_mcp: []
+sub_skills:
+  - humanizer-zh  # 用于 AI 写作痕迹检测与文本优化
 ---
 
 ## Skill 定位
@@ -118,9 +120,24 @@ templates/paper/
 
 ---
 
-### Step 2: 分章节自动撰写
+### Step 2: 分章节自动撰写 + AI 痕迹检测
 
-按标准学术论文结构逐节生成：
+按标准学术论文结构逐节生成。**每节生成后自动调用 humanizer-zh 进行 AI 写作痕迹检测**，重点检查：
+  - 破折号过度使用（经济学论文应克制使用）
+  - 三段式法则结构（"此外""然而"连接词滥用）
+  - 中文引号格式（\textquotedblleft/\textquotedblright 配对）
+  - 宣传性语言和填充短语
+  - 句子结构单一性问题
+
+---
+
+**每节生成流程：**
+1. 基于 context_store 自动生成章节内容
+2. **自动调用 humanizer-zh 进行 QC 检查**
+3. 根据检测结果自动修正问题
+4. 保存最终版本到 `paper/sections/`
+
+---
 
 #### 01_introduction.tex (引言)
 - 研究背景与现实意义

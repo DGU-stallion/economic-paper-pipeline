@@ -394,7 +394,7 @@ MICRO_STATES = [
         "requires_confirm": True,
     },
 
-    # ========== Stage 7: LaTeX论文 (1 个状态 - 可进一步拆分) ==========
+    # ========== Stage 7: LaTeX论文 (3 个状态) ==========
     {
         "id": "paper-outline",
         "stage": "paper",
@@ -410,8 +410,18 @@ MICRO_STATES = [
         "stage": "paper",
         "name": "论文撰写与编译",
         "description": "生成LaTeX源码并编译PDF",
-        "entry_prompt": "【论文撰写中】\n正在生成 LaTeX 论文源码...",
+        "entry_prompt": "【论文撰写中】\n正在生成 LaTeX 论文源码...\n\n撰写完成后将自动进行 AI 痕迹检测 (Humanizer-zh)，检查项目包括：\n  ✅ 破折号滥用检测\n  ✅ 句式单一性检查\n  ✅ 中文写作规范检查\n  ✅ LaTeX 引号规范检查",
         "output_path": "paper/main.tex",
+        "next_states": ["paper-qc"],
+        "requires_confirm": True,
+    },
+    {
+        "id": "paper-qc",
+        "stage": "paper",
+        "name": "论文质量检测 (Humanizer-zh)",
+        "description": "AI痕迹检测与质量优化",
+        "entry_prompt": "【论文质量检测】\n正在运行 Humanizer-zh AI 写作模式检测...\n\n检测项目：\n  1. 破折号滥用检测（连续短破折号、过度使用）\n  2. 句式单一性检查（规则三句式、重复开头）\n  3. 中文写作规范检查（冗余助词、被动语态滥用）\n  4. LaTeX 引号规范检查（中文引号配对）\n\n检测结果将显示问题位置和修改建议。",
+        "output_path": "paper/humanizer_report.md",
         "next_states": [],  # 终态
         "requires_confirm": True,
     },
@@ -831,8 +841,65 @@ def cmd_states(_=None):
         print(f"  [{i + 1:2d}] {confirm_marker:8s} {state['id']:30s} - {state['name']}")
 
 
+def check_stage_readiness(state_id):
+    """阶段门禁：轻量检查必须的文件/字段存在才允许推进
+    返回 (can_advance: bool, warnings: list)
+    """
+    current_state = get_state_by_id(state_id)
+    if not current_state:
+        return True, []
+
+    stage = current_state["stage"]
+    project_name, state = load_state()
+    if not project_name:
+        return True, []
+
+    project_path = get_project_path(project_name)
+    ctx = state.get("context_store", {})
+    warnings = []
+
+    # ========== 各阶段门禁规则 ==========
+    if stage == "stata":
+        # 进入实证阶段前的检查
+        data_file = project_path / "data" / "clean" / "panel_clean.dta"
+        if not data_file.exists():
+            warnings.append("❌ 清洗后数据不存在，请先运行数据清洗")
+
+        topic_ctx = ctx.get("topic", {})
+        if not topic_ctx.get("y_var"):
+            warnings.append("❌ 未定义 Y 变量，请在选题阶段确认变量")
+        if not topic_ctx.get("d_var"):
+            warnings.append("❌ 未定义核心解释变量 D")
+
+    elif stage == "paper":
+        # 进入论文阶段前的检查
+        output_dir = project_path / "analysis" / "output"
+        tables = list(output_dir.glob("*.tex"))
+        if not tables:
+            warnings.append("⚠️  未发现回归表格文件，论文可能缺少实证结果")
+
+        main_tex = project_path / "paper" / "main.tex"
+        if not main_tex.exists():
+            warnings.append("❌ 论文源文件 main.tex 不存在")
+
+    elif stage == "data":
+        # 进入数据阶段前
+        raw_dir = project_path / "data" / "raw"
+        raw_files = list(raw_dir.glob("*.dta")) + list(raw_dir.glob("*.xlsx")) + list(raw_dir.glob("*.csv"))
+        if not raw_files:
+            warnings.append("⚠️  data/raw/ 目录为空，请先放入原始数据")
+
+    # 编译前检查
+    if "paper" in state_id and current_state.get("next_states"):
+        bib_file = project_path / "paper" / "erjref.bib"
+        if not bib_file.exists():
+            warnings.append("⚠️  参考文献 bib 文件不存在")
+
+    return len(warnings) == 0, warnings
+
+
 def cmd_advance(args):
-    """推进到下一状态: python pipeline.py advance [--skip-confirm] [--branch <索引>]"""
+    """推进到下一状态: python pipeline.py advance [--skip-confirm] [--branch <索引>] [--force]"""
     project_name, state = load_state()
     if project_name is None:
         print("未选择项目")
@@ -844,6 +911,24 @@ def cmd_advance(args):
     if not current_state:
         print(f"错误: 未知状态 '{current_state_id}'")
         return
+
+    # 门禁检查
+    force = "--force" in args
+    can_advance, warnings = check_stage_readiness(current_state_id)
+
+    if warnings and not force:
+        print("=" * 60)
+        print("  🚧 阶段门禁检查发现以下问题：")
+        print("=" * 60)
+        for w in warnings:
+            print(f"  {w}")
+        print()
+        print("  解决问题后再次运行，或加 --force 强行推进")
+        print("=" * 60)
+        return
+
+    if warnings and force:
+        print("⚠️  发现问题但使用 --force 强行推进，风险自负！")
 
     # 确定目标状态
     branch_idx = None
@@ -994,6 +1079,33 @@ def cmd_jump(args):
     print(f"[完成] 已跳转到: {target_state['name']} ({target_state['id']})")
     print(f"   所属阶段: {STAGE_GROUPS.get(target_state['stage'], {}).get('name', '')}")
     print(f"   输出路径: {target_state['output_path']}")
+
+    # Context 完整性提醒
+    ctx = state.get("context_store", {})
+    stage = target_state["stage"]
+    missing = []
+
+    if stage == "stata":
+        t = ctx.get("topic", {})
+        if not t.get("y_var"):
+            missing.append("Y 变量 (被解释变量)")
+        if not t.get("d_var"):
+            missing.append("D 变量 (核心解释变量)")
+        if not t.get("identification"):
+            missing.append("识别策略 (FE/DID/IV 等)")
+
+    elif stage == "paper":
+        s = ctx.get("stata", {})
+        if not s.get("baseline_coef"):
+            missing.append("基准回归系数")
+        lit = ctx.get("literature", {})
+        if not lit.get("total_papers"):
+            missing.append("文献综述结果")
+
+    if missing:
+        print(f"\n  ⚠️  提醒：以下字段尚未填写，可能影响后续流程：")
+        for m in missing:
+            print(f"    - {m}")
 
 
 def cmd_prompt(_=None):
@@ -1495,26 +1607,49 @@ def cmd_gen_do(args):
         print(f"   所有占位符已替换完成")
 
 
+def compute_do_hash(do_path, data_path=None):
+    """计算 do-file + 依赖数据的哈希值，用于增量执行判断"""
+    import hashlib
+
+    hasher = hashlib.sha256()
+
+    # do-file 内容
+    with open(do_path, "r", encoding="utf-8", errors="replace") as f:
+        hasher.update(f.read().encode("utf-8"))
+
+    # 数据文件（如果存在）
+    if data_path and data_path.exists():
+        with open(data_path, "rb") as f:
+            # 只读前 1MB，大文件不需要全读
+            hasher.update(f.read(1024 * 1024))
+        hasher.update(str(data_path.stat().st_mtime).encode("utf-8"))
+
+    return hasher.hexdigest()
+
+
 def cmd_run_stata(args):
-    """批量运行Stata do-file并自动解析结果"""
+    """批量运行Stata do-file并自动解析结果
+    支持增量执行：输入无变化时自动跳过
+    """
     project_name, state = load_state()
     if project_name is None:
         print("未选择项目")
         return
 
     if len(args) < 3:
-        print("用法: python pipeline.py run-stata <do-file-name>")
-        print("  all - 运行所有do-file (01_clean -> 02_baseline -> 03_mediation -> 04_heterogeneity)")
-        print("  01_baseline - 仅运行基准回归")
-        print("  02_mediation - 仅运行中介效应")
-        print("  03_heterogeneity - 仅运行异质性分析")
+        print("用法: python pipeline.py run-stata <do-file-name> [--force]")
+        print("  all - 运行所有do-file")
+        print("  --force - 强制运行，跳过增量缓存检查")
         return
 
     do_name = args[2]
+    force = "--force" in args
     project_path = get_project_path(project_name)
     do_dir = project_path / "analysis" / "do-files"
     log_dir = project_path / "analysis" / "logs"
+    cache_dir = project_path / ".cache"
     log_dir.mkdir(exist_ok=True)
+    cache_dir.mkdir(exist_ok=True)
 
     # 定义运行顺序
     do_sequence = {
@@ -1537,16 +1672,35 @@ def cmd_run_stata(args):
         print(f"❌ 未找到可运行的do-file: {do_name}")
         return
 
-    print(f"=== 开始运行 {len(do_files)} 个do-file ===\n")
+    print(f"=== 开始运行 {len(do_files)} 个do-file ===")
+    if not force:
+        print("  💡 增量模式：输入无变化自动跳过，加 --force 强制运行")
+    print()
 
     import subprocess
+    skipped_count = 0
 
     for do in do_files:
         do_file = do_dir / f"{do}.do"
         log_file = log_dir / f"{do}.log"
+        hash_file = cache_dir / f"{do}.hash"
         description = do_sequence.get(do, do)
 
-        print(f"▶️  正在运行: {description} ({do}.do)")
+        print(f"▶️  {description} ({do}.do)")
+
+        # 增量执行检查
+        if not force:
+            # 通用的依赖：清洗后的数据
+            data_file = project_path / "data" / "clean" / "panel_clean.dta"
+            current_hash = compute_do_hash(do_file, data_file)
+
+            if hash_file.exists():
+                cached_hash = hash_file.read_text().strip()
+                if current_hash == cached_hash:
+                    print(f"   ⏭️  输入无变化，自动跳过")
+                    skipped_count += 1
+                    print()
+                    continue
 
         try:
             # 运行Stata (需要Stata在PATH中，或者提供完整路径)
@@ -1569,6 +1723,11 @@ def cmd_run_stata(args):
             if result.returncode == 0:
                 print(f"   ✅ 完成，日志: {log_file.name}")
 
+                # 保存 hash，下次增量使用
+                data_file = project_path / "data" / "clean" / "panel_clean.dta"
+                current_hash = compute_do_hash(do_file, data_file)
+                hash_file.write_text(current_hash)
+
                 # 自动解读关键结果
                 with open(log_file, "r", encoding="utf-8", errors="replace") as f:
                     content = f.read()
@@ -1586,7 +1745,7 @@ def cmd_run_stata(args):
 
         except FileNotFoundError:
             print("   ⚠️  未找到Stata命令，请确保Stata在PATH中")
-            print("   或手动在Stata中运行: do " + str(do_file))
+            print("   或手动在Stata中运行: do " + str(do_file).replace("\\", "/"))
         except subprocess.TimeoutExpired:
             print(f"   ⚠️  运行超时 (> 5分钟)")
         except Exception as e:
@@ -1595,6 +1754,8 @@ def cmd_run_stata(args):
         print()
 
     print(f"=== 全部运行完成 ===")
+    if skipped_count > 0:
+        print(f"  ⏭️  跳过 {skipped_count} 个无变化的do-file")
     print(f"日志目录: {log_dir}")
 
 
@@ -1763,6 +1924,120 @@ def cmd_context_stage(args):
     print(f"✅ 阶段上下文已生成: {context_file}")
     print()
     print(md)
+
+
+def cmd_cleanup(_=None):
+    """🧹 清道夫工程：项目定稿后清理中间产物
+    L1 安全自动删: LaTeX 编译垃圾
+    L2 询问删除: Stata 运行日志
+    L3 提醒可选删: 版本化的PDF、临时数据
+    """
+    project_name, state = load_state()
+    if project_name is None:
+        print("未选择项目")
+        return
+
+    project_path = get_project_path(project_name)
+    paper_dir = project_path / "paper"
+    log_dir = project_path / "analysis" / "logs"
+    temp_dir = project_path / "data" / "temp"
+
+    print("=" * 60)
+    print("  🧹 清道夫工程 - 清理项目中间产物")
+    print("=" * 60)
+    print(f"  项目: {project_name}")
+    print()
+
+    deleted_count = 0
+    total_size = 0
+    skipped = []
+
+    # ========== L1: 绝对安全自动删除 ==========
+    print("[L1] 安全清理（LaTeX 编译垃圾）")
+    safe_extensions = [
+        ".aux", ".bbl", ".bcf", ".blg", ".log", ".out",
+        ".toc", ".lof", ".lot", ".run.xml", ".synctex.gz",
+        ".synctex(busy)", ".fdb_latexmk", ".fls"
+    ]
+    l1_files = []
+    for ext in safe_extensions:
+        l1_files.extend(paper_dir.glob(f"*{ext}"))
+
+    if l1_files:
+        for f in l1_files:
+            try:
+                size = f.stat().st_size
+                f.unlink()
+                deleted_count += 1
+                total_size += size
+                print(f"  ✅ 删除 {f.name} ({size/1024:.1f} KB)")
+            except Exception as e:
+                skipped.append((f.name, str(e)))
+        print(f"  L1 完成: 删除 {len(l1_files)} 个文件\n")
+    else:
+        print("  ✅ 无 LaTeX 垃圾文件\n")
+
+    # ========== L2: 谨慎询问删除 ==========
+    print("[L2] Stata 运行日志")
+    l2_files = list(log_dir.glob("*.log")) if log_dir.exists() else []
+
+    if l2_files:
+        l2_size = sum(f.stat().st_size for f in l2_files)
+        print(f"  发现 {len(l2_files)} 个日志文件，共 {l2_size/1024/1024:.2f} MB")
+        confirm = input("  删除日志？（运行记录不可恢复）[y/N] ").strip().lower()
+        if confirm == "y":
+            for f in l2_files:
+                try:
+                    size = f.stat().st_size
+                    f.unlink()
+                    deleted_count += 1
+                    total_size += size
+                    print(f"  ✅ 删除 {f.name}")
+                except Exception as e:
+                    skipped.append((f.name, str(e)))
+        else:
+            print("  ⏭️  保留日志文件")
+        print()
+    else:
+        print("  ✅ 无日志文件\n")
+
+    # ========== L3: 可选删除提醒 ==========
+    print("[L3] 可选清理（建议手动检查）")
+    l3_candidates = []
+
+    # 版本化的PDF: main_v1.pdf, main_2025.pdf 等
+    if paper_dir.exists():
+        for f in paper_dir.glob("*.pdf"):
+            if f.name != "main.pdf":
+                l3_candidates.append(f)
+
+    # 临时数据文件
+    if temp_dir.exists():
+        l3_candidates.extend(temp_dir.glob("*.dta"))
+        l3_candidates.extend(temp_dir.glob("*.xlsx"))
+
+    if l3_candidates:
+        l3_size = sum(f.stat().st_size for f in l3_candidates)
+        print(f"  发现 {len(l3_candidates)} 个可清理文件，共 {l3_size/1024/1024:.2f} MB:")
+        for f in l3_candidates:
+            print(f"   - {f.parent.name}/{f.name}")
+        print(f"  建议：确认 final.pdf 没问题后，手动删除这些旧版本\n")
+    else:
+        print("  ✅ 无可选清理文件\n")
+
+    # ========== 总结 ==========
+    print("=" * 60)
+    print("  📊 清理总结")
+    print("=" * 60)
+    print(f"  已删除: {deleted_count} 个文件")
+    print(f"  释放空间: {total_size / 1024 / 1024:.2f} MB")
+
+    if skipped:
+        print(f"\n  ⚠️  跳过 {len(skipped)} 个文件（被占用或无权限）:")
+        for name, reason in skipped:
+            print(f"   - {name}: {reason[:50]}")
+
+    print(f"\n  💡 项目已清理，准备归档！")
 
 
 def cmd_check_data(args):
@@ -2037,6 +2312,7 @@ def main():
         "templates": cmd_templates,
         "set-template": cmd_set_template,
         "compile": cmd_compile,
+        "cleanup": cmd_cleanup,
         "wc": cmd_word_count,
         "word-count": cmd_word_count,
         "cite-fix": cmd_cite_fix,
@@ -2063,7 +2339,7 @@ def main():
         print("  项目管理: list, new <name>, use <name>, status, history, reset, undo")
         print("  状态控制: states, advance, jump <state>, prompt, graph")
         print("  上下文:   init-config, set-context, get-context, context-stage")
-        print("  论文工具: compile, wc/word-count, cite-fix")
+        print("  论文工具: compile, cleanup, wc/word-count, cite-fix")
         print("  Stata工具: gen-do <type>, run-stata <do-file|all>, check-data, run-all")
         print("  模板设置: templates, set-template <name>")
         print("  对话记忆: input, resume, memory-stats, chat, decisions")
