@@ -117,13 +117,13 @@ claude .  # 在项目目录内启动 Claude Code
 
 | 阶段 | 自动化程度 | 人机协作点 |
 |------|-----------|-----------|
-| 1. 选题研究 | 半自动 | 5W1H 逐维引导 → Gap 识别 → SMART 问题 |
-| 2. 文献综述 | 自动+确认 | MCP 检索 Google Scholar，关键文献可人工确认 |
-| 3. 数据清洗 | 自动 | 数据格式自动识别，缺失值异常值处理 |
-| 4. Stata 实证 | 自动 | 模型设定、变量选择可确认，基准/中介/异质性自动跑 |
-| 5. 稳健性检验 | 自动 | 替换变量/改变样本/安慰剂检验，结果异常自动反馈 |
-| 6. 结论验证 | 自动+确认 | 对比假设与结果，边际贡献梳理 |
-| 7. LaTeX 论文 | 自动 | 所有表格自动注入，参考文献自动排版，一键编译 PDF |
+| 1. 概念助手 | 半自动 | 5W1H 逐维引导 → Gap 识别 → SMART 问题，产出研究方案 |
+| 2. 调研助手 | 自动 | 候选论文列表 + 数据源可行性报告（依赖 web-access） |
+| 3. 文献助手 | 自动+确认 | 筛选论文 → 脉络梳理 → 综述 + .bib |
+| 4. 数据助手 | 自动 | 数据格式自动识别，缺失值异常值处理 |
+| 5. 实证分析 | 自动 | 模型设定、变量选择可确认，基准/中介/异质性自动跑 |
+| 6. 稳健性检验 | 自动 | 替换变量/改变样本/安慰剂检验，结果异常自动反馈 |
+| 7. 论文撰写 | 自动 | 所有表格自动注入，参考文献自动排版，一键编译 PDF |
 
 **关键原则**：技术操作自动执行，研究决策节点可请求用户介入。状态机支持决策分支——基准回归不显著时自动引导回到模型设定而非盲目前进。
 
@@ -145,19 +145,24 @@ economic-paper-pipeline/
 │   ├── econ-advance.md
 │   ├── econ-reset.md
 │   └── econ-compile.md
-├── skills/                       # 子 Skill（自动发现）
-│   ├── coordinator/SKILL.md      #   意图识别、路由、分层记忆协议
-│   ├── topic/SKILL.md            #   选题研究（5W1H → Gap → SMART）
-│   ├── literature/SKILL.md       #   文献综述（检索 → 摘要 → 综述 → .bib）
-│   ├── stata/SKILL.md            #   Stata 实证（清洗 → 基准 → 中介 → 异质 → 稳健）
-│   ├── latex/SKILL.md            #   LaTeX 论文（模板 → 章节 → 表格注入 → 编译）
-│   └── humanizer-zh/SKILL.md     #   中文 AI 痕迹检测与质量优化
 ├── hooks/
 │   └── hooks.json                # SessionStart 钩子
 ├── scripts/
-│   ├── pipeline.py               #   状态机引擎（微状态 + 上下文管理 + 分层记忆）
-│   ├── memory.py                 #   对话记忆持久化
-│   └── announce-plugin-loaded.sh
+│   ├── orchestrator.py           # 编排器：项目 CRUD、状态机、模块路由
+│   ├── pipeline.py               # 后向兼容入口（委托给 orchestrator）
+│   ├── shared/                   # 共享层
+│   │   ├── contract.py           # ModuleContract + FieldSpec
+│   │   ├── registry.py           # 模块注册表（依赖推导 + 校验）
+│   │   └── state.py              # pipeline_state.json 读写
+│   └── modules/                  # 8 个可独立运行的模块
+│       ├── conceptualize/        # 概念助手：5W1H → Gap → SMART
+│       ├── research/             # 调研助手：搜索文献 + 数据源
+│       ├── literature/           # 文献助手：筛选 → 综述 → .bib
+│       ├── data/                 # 数据助手：清洗 → 验证
+│       ├── analyze/              # 分析助手：回归 → 异质性
+│       ├── verify/               # 验证助手：稳健性检验
+│       ├── write/                # 论文助手：LaTeX 生成
+│       └── format/               # 格式助手：编译 + humanizer
 ├── .mcp.json                     # MCP 服务器配置
 ├── CLAUDE.md                     # AI 协作主协议
 ├── templates/                    # 论文模板（零硬编码，{{PLACEHOLDER}} 系统）

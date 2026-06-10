@@ -94,16 +94,19 @@ Agent 会在后台执行并展示给你结果。
 
 ```
 economic-paper-pipeline/
-├── scripts/                    # 通用脚本
-│   ├── pipeline.py             # 状态机引擎
-│   └── memory.py               # 对话记忆
-├── skills/                     # 原子化子 Skill
-│   ├── coordinator/            # 协调器
-│   ├── topic/                  # 选题研究
-│   ├── literature/             # 文献综述
-│   ├── stata/                  # Stata 实证
-│   ├── latex/                  # LaTeX 论文
-│   └── shared/interfaces/     # 接口规范
+├── scripts/                    # 核心脚本
+│   ├── orchestrator.py         # 编排器（状态管理 + 模块路由）
+│   ├── pipeline.py             # 后向兼容入口
+│   ├── shared/                 # 共享层（契约 / 注册表 / 状态）
+│   └── modules/                # 8 个独立模块
+│       ├── conceptualize/      # 概念助手
+│       ├── research/           # 调研助手
+│       ├── literature/         # 文献助手
+│       ├── data/               # 数据助手
+│       ├── analyze/            # 分析助手
+│       ├── verify/             # 验证助手
+│       ├── write/              # 论文助手
+│       └── format/             # 格式助手
 ├── docs/                       # 文档
 ├── config/                     # 配置
 ├── templates/                  # 新项目模板

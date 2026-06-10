@@ -28,10 +28,12 @@ MODULE_CONTRACT = ModuleContract(
         "time_window": FieldSpec(
             type="str", required=False,
             desc="时间窗口描述，如 '2010-2020'",
+            source="conceptualize",
         ),
         "geographic_scope": FieldSpec(
             type="str", required=False,
             desc="地理范围，如 '中国 A 股上市公司'",
+            source="conceptualize",
         ),
         "identification": FieldSpec(
             type="str", required=False,

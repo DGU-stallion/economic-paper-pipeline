@@ -38,6 +38,14 @@ MODULE_CONTRACT = ModuleContract(
             type="list[str]", required=False,
             desc="搜索关键词（自动生成，供调研助手使用）",
         ),
+        "time_window": FieldSpec(
+            type="str", required=False,
+            desc="时间窗口，如 '2010-2020'",
+        ),
+        "geographic_scope": FieldSpec(
+            type="str", required=False,
+            desc="地理范围，如 '中国 A 股上市公司'",
+        ),
     },
 
     states=[
