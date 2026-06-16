@@ -33,14 +33,7 @@ from scripts.shared.state import (
     get_project_path,
 )
 from scripts.shared.registry import ModuleRegistry, get_registry
-
-
-# ── 路径 ──
-
-PLUGIN_ROOT = Path(__file__).parent.parent
-TEMPLATES_DIR = PLUGIN_ROOT / "templates"
-PAPERS_DIR = Path.cwd() / "papers"
-CONFIG_DIR = Path.cwd() / ".config"
+from scripts.shared.paths import PROJECT_ROOT as PLUGIN_ROOT, PAPERS_DIR, CONFIG_DIR, TEMPLATES_DIR
 
 
 # ── 编排器 ──

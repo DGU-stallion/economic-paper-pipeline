@@ -17,8 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
-
+from scripts.shared.paths import PAPERS_DIR
 from scripts.modules.conceptualize.core import run, commit_proposal, ENTRY_PROMPT
 
 
@@ -65,11 +64,9 @@ def main():
         print("在 Claude 中直接说自然语言即可，不需要手动传参数。")
         return
 
-    PROJECTS_DIR = Path.cwd() / "papers"
-
     project_dir = None
     if args.project:
-        project_dir = PROJECTS_DIR / args.project
+        project_dir = PAPERS_DIR / args.project
         if not project_dir.exists():
             print(f"项目 '{args.project}' 不存在")
             sys.exit(1)

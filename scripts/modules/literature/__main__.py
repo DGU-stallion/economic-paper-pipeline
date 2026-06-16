@@ -2,7 +2,7 @@
 """文献助手 — 独立运行入口"""
 from __future__ import annotations
 import argparse, json, sys
-from pathlib import Path
+from scripts.shared.paths import PAPERS_DIR
 from scripts.modules.literature.core import run, commit_review, commit_bib, ENTRY_PROMPT
 
 
@@ -20,8 +20,7 @@ def main():
         print(ENTRY_PROMPT.format(paper_count=args.paper_count))
         return
 
-    PROJECTS_DIR = Path.cwd() / "papers"
-    project_dir = PROJECTS_DIR / args.project if args.project else None
+    project_dir = PAPERS_DIR / args.project if args.project else None
 
     papers = []
     if args.papers:

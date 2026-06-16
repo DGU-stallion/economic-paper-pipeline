@@ -8,7 +8,8 @@ ssc install mdesc, replace
 ssc install winsor2, replace
 ssc install schemepack, replace
 
-* 验证数据
-use "D:/Project/economic-paper-pipeline/data/clean/china_provincial_panel.dta", clear
+* 验证数据（路径由 PROJECT_ROOT 环境变量或当前工作目录决定）
+global DATA_DIR "$PROJECT_ROOT/data/clean"
+use "$DATA_DIR/panel_clean.dta", clear
 describe
 sum

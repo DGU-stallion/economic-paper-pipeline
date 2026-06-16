@@ -17,8 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
-
+from scripts.shared.paths import PAPERS_DIR
 from scripts.modules.research.core import run, commit_results
 from scripts.modules.research.web_access import detect as detect_web_access, get_installation_guide
 
@@ -108,11 +107,9 @@ def main():
         return
 
     # ── 快速模式 / 提交模式 ──
-    PROJECTS_DIR = Path.cwd() / "papers"
-
     project_dir = None
     if args.project:
-        project_dir = PROJECTS_DIR / args.project
+        project_dir = PAPERS_DIR / args.project
         if not project_dir.exists():
             print(f"项目 '{args.project}' 不存在")
             sys.exit(1)

@@ -1,10 +1,10 @@
 ---
 name: econ-paper
-description: 进入 LaTeX 论文撰写阶段
+description: 进入论文撰写阶段
 ---
 
-当用户输入 `/econ-paper` 时：
-1. 调用 `python scripts/pipeline.py jump paper`
-2. 确认论文偏好（模板、字数、参考文献格式、语言）
-3. 自动生成章节内容并注入表格和图片
-4. 告知用户编译方式（本地 xelatex 或 Overleaf 上传）
+用户说"写论文"时：
+1. 检查上游产出是否就绪（回归表格、文献综述、参考文献）
+2. 缺 → 提示缺失项，询问是否跳过后端能力直接生成模板
+3. 就绪 → 整合所有 upstream context，生成 .tex 各部分
+4. 输出完整论文框架，用户可逐段精修

@@ -10,8 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 
-ROOT = Path(__file__).parent.parent
-PAPERS_DIR = ROOT / "papers"
+from scripts.shared.paths import PAPERS_DIR
 
 
 class ConversationMemory:
@@ -275,7 +274,8 @@ def get_memory(project_name: str) -> ConversationMemory:
 
 def get_current_project_memory() -> Optional[ConversationMemory]:
     """获取当前项目的对话记忆"""
-    current_file = ROOT / "config" / "current_project.json"
+    from scripts.shared.paths import CONFIG_DIR
+    current_file = CONFIG_DIR / "current_project.json"
     if not current_file.exists():
         return None
     with open(current_file, "r", encoding="utf-8") as f:

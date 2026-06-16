@@ -1,14 +1,10 @@
 ---
 name: econ-compile
-description: 本地编译 LaTeX 论文（xelatex × 3 + biber）
+description: 编译 LaTeX 论文为 PDF
 ---
 
-当用户输入 `/econ-compile` 时：
-1. 确认当前在论文撰写阶段
-2. 执行本地 LaTeX 编译：
-   - xelatex main.tex（第 1 次）
-   - biber main
-   - xelatex main.tex（第 2 次）
-   - xelatex main.tex（第 3 次）
-3. 编译成功则告知 PDF 路径
-4. 编译失败则显示具体错误并尝试修复
+当用户说"编译"时：
+1. 检测 TeX Live 是否可用（`xelatex --version`）
+2. 可用 → 执行 xelatex × 3 + biber 管线
+3. 不可用 → 提示 Overleaf 上传路径或本地安装指引
+4. 编译错误 → 提取关键错误信息，尝试自动修复

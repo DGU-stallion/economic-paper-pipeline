@@ -2,13 +2,21 @@
 """分析助手核心逻辑
 
 模型设定 → 基准回归 → 异质性分析 → 中介效应。
-LLM 在对话中驱动，core.py 负责 do-file 模板渲染和结果表格输出。
+Python 后端 (linearmodels) 自动运行回归并生成 .tex 表格。
+Stata do-file 模板保留为旧版兼容 (docstring 标记 [旧版兼容])。
 """
 
 from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
+
+from scripts.backends import detect
+from scripts.backends.python_analysis import (
+    run_panel_ols,
+    run_heterogeneity,
+    run_did,
+)
 
 
 def run(
@@ -19,15 +27,26 @@ def run(
     clean_data_path: str = "",
     project_dir: Optional[Path] = None,
 ) -> dict:
-    """启动分析流程"""
+    """启动分析流程（自动检测后端，Python 可用则直接运行回归）"""
     if project_dir:
         (project_dir / "analysis" / "do-files").mkdir(parents=True, exist_ok=True)
         (project_dir / "analysis" / "output").mkdir(parents=True, exist_ok=True)
-    return {
-        "baseline": {},
-        "heterogeneity": {},
-        "mediation": {},
-    }
+
+    caps = detect()
+    backend = "python" if caps["python_analysis"] else "llm"
+
+    result = {"baseline": {}, "heterogeneity": {}, "mediation": {}, "backend": backend}
+
+    if backend == "python" and y_var and d_var and clean_data_path and project_dir:
+        result["baseline"] = run_panel_ols(
+            data_path=Path(clean_data_path),
+            y_var=y_var,
+            d_var=d_var,
+            controls=control_vars or [],
+            project_dir=project_dir,
+        )
+
+    return result
 
 
 def commit_model_spec(spec: str, project_dir: Path) -> str:
@@ -45,11 +64,12 @@ def commit_baseline_do(
     cluster: str,
     project_dir: Path,
 ) -> str:
-    """生成基准回归 do-file"""
+    """[旧版兼容] 生成基准回归 do-file"""
     controls_str = " ".join(controls) if controls else ""
     content = f"""\
 * 基准回归 (自动生成 {datetime.now().isoformat(timespec='minutes')})
 * Y={y_var}, D={d_var}, FE={fe}, Cluster={cluster}
+* 提示: 已切换至 Python 后端，此 do-file 仅为 Stata 兼容
 
 use "${{DATA}}/clean/panel_clean.dta", clear
 
@@ -76,7 +96,7 @@ esttab m1 m2 using "${{OUTPUT}}/02_baseline_regression.tex", ///
 
 
 def commit_baseline_tex(result: dict, project_dir: Path) -> str:
-    """写入基准回归 .tex 表格（LLM 解析 Stata 输出后生成）"""
+    """[旧版兼容] 写入基准回归 .tex 表格（Python 后端已自动生成，此函数供 LLM 回退）"""
     now = datetime.now().isoformat(timespec="minutes")
 
     rows = []
@@ -111,7 +131,7 @@ def commit_baseline_tex(result: dict, project_dir: Path) -> str:
 
 
 def commit_heterogeneity_tex(result: dict, project_dir: Path) -> str:
-    """写入异质性分析 .tex 表格"""
+    """[旧版兼容] 写入异质性分析 .tex 表格（Python 后端自动生成）"""
     now = datetime.now().isoformat(timespec="minutes")
 
     groups = result.get("groups", [])
@@ -141,3 +161,79 @@ def commit_heterogeneity_tex(result: dict, project_dir: Path) -> str:
     tex_path = project_dir / "analysis" / "output" / "03_heterogeneity.tex"
     tex_path.write_text(tex, encoding="utf-8")
     return str(tex_path)
+
+
+# ── Python 后端显式调用入口 ──
+
+
+def run_baseline_python(
+    clean_data_path: str,
+    y_var: str,
+    d_var: str,
+    controls: Optional[List[str]] = None,
+    fe_entity: str = "id",
+    fe_time: str = "year",
+    cluster_entity: str = "id",
+    project_dir: Optional[Path] = None,
+) -> dict:
+    """显式调用 Python 后端跑基准回归 (PanelOLS)。"""
+    return run_panel_ols(
+        data_path=Path(clean_data_path),
+        y_var=y_var,
+        d_var=d_var,
+        controls=controls,
+        fe_entity=fe_entity,
+        fe_time=fe_time,
+        cluster_entity=cluster_entity,
+        project_dir=project_dir,
+    )
+
+
+def run_heterogeneity_python(
+    clean_data_path: str,
+    y_var: str,
+    d_var: str,
+    group_var: str,
+    controls: Optional[List[str]] = None,
+    fe_entity: str = "id",
+    fe_time: str = "year",
+    cluster_entity: str = "id",
+    project_dir: Optional[Path] = None,
+) -> dict:
+    """显式调用 Python 后端跑异质性分析。"""
+    return run_heterogeneity(
+        data_path=Path(clean_data_path),
+        y_var=y_var,
+        d_var=d_var,
+        group_var=group_var,
+        controls=controls,
+        fe_entity=fe_entity,
+        fe_time=fe_time,
+        cluster_entity=cluster_entity,
+        project_dir=project_dir,
+    )
+
+
+def run_did_python(
+    clean_data_path: str,
+    y_var: str,
+    treat_var: str,
+    post_var: str,
+    controls: Optional[List[str]] = None,
+    fe_entity: str = "id",
+    fe_time: str = "year",
+    cluster_entity: str = "id",
+    project_dir: Optional[Path] = None,
+) -> dict:
+    """显式调用 Python 后端跑 DID (Treat×Post)。"""
+    return run_did(
+        data_path=Path(clean_data_path),
+        y_var=y_var,
+        treat_var=treat_var,
+        post_var=post_var,
+        controls=controls,
+        fe_entity=fe_entity,
+        fe_time=fe_time,
+        cluster_entity=cluster_entity,
+        project_dir=project_dir,
+    )

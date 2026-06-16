@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """验证助手 — 独立运行入口"""
 import argparse, json
-from pathlib import Path
+from scripts.shared.paths import PAPERS_DIR
 from scripts.modules.verify.core import run, commit_results
 
 
@@ -11,8 +11,7 @@ def main():
     parser.add_argument("--results", help="稳健性检验结果 JSON")
     args = parser.parse_args()
 
-    PROJECTS_DIR = Path.cwd() / "papers"
-    project_dir = PROJECTS_DIR / args.project if args.project else None
+    project_dir = PAPERS_DIR / args.project if args.project else None
 
     if args.results and project_dir:
         with open(args.results, "r", encoding="utf-8") as f:

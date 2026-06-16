@@ -5,10 +5,7 @@
       "command": "uvx",
       "args": [
         "stata-mcp"
-      ],
-      "env": {
-        "STATA_MCP__CWD": "D:\\Project\\economic-paper-pipeline"
-      }
+      ]
     },
     "paper-search-mcp": {
       "type": "stdio",

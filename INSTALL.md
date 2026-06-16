@@ -6,14 +6,19 @@
 
 | 软件 | 版本要求 | 说明 |
 |------|---------|------|
-| **Python** | 3.12+ | 数据处理、工作流管理 |
-| **StataMP** | 18+ | 实证回归分析 |
+| **Python** | 3.12+ | 数据处理、实证分析、工作流管理 |
 | **TeX Live** | 2023+ | LaTeX 论文编译，需安装 `collection-langchinese` 和 `collection-bibtexextra` |
-| **uv** | 最新版 | Python 包管理器，用于启动 MCP 服务器 |
+
+### 可选软件
+
+| 软件 | 版本要求 | 说明 |
+|------|---------|------|
+| **StataMP** | 18+ | 旧版兼容：若需 Stata 后端 |
+| **uv** | 最新版 | Python 包管理器，用于可选 MCP 服务器 |
 
 ### Claude Code 配置
 
-本项目作为 Claude Code Skill 使用，需要配置 MCP 服务器。
+本项目作为 Claude Code Skill 使用。
 
 ---
 
@@ -29,12 +34,20 @@ cd economic-paper-pipeline
 ### 2. 安装 Python 依赖
 
 ```bash
-pip install pandas numpy requests beautifulsoup4 yfinance openpyxl statsmodels
+pip install pandas numpy requests beautifulsoup4 yfinance openpyxl statsmodels linearmodels
 ```
 
-### 3. 配置 MCP 服务器
+`linearmodels` 用于面板固定效应回归（替代 Stata `reghdfe`）。无 Stata 时自动使用 Python 后端。
 
-编辑 `~/.claude/settings.json`（或项目本地 `.claude/settings.json`），添加 MCP 服务器配置：
+### 3. 验证后端
+
+```bash
+python3 -c "from linearmodels.panel import PanelOLS; print('Python 后端就绪')"
+```
+
+### 4. （可选）配置 Stata MCP
+
+仅在使用 Stata 后端时需要。编辑 `~/.claude/settings.json`：
 
 ```json
 {
@@ -42,26 +55,18 @@ pip install pandas numpy requests beautifulsoup4 yfinance openpyxl statsmodels
     "stata-mcp": {
       "command": "uvx",
       "args": ["stata-mcp"]
-    },
-    "paper-search-mcp": {
-      "command": "uv",
-      "args": ["run", "--with", "paper-search-mcp", "python", "-m", "paper_search_mcp.server"]
     }
   }
 }
 ```
 
-### 4. 配置 Stata 路径
-
-编辑 `.statamcp/config.json`：
-
-```json
-{
-  "stata_path": "D:\\Program Files\\Stata\\StataMP-64.exe"
-}
+配置 Stata 路径（macOS/Linux）：
+```bash
+# 创建 .statamcp/config.toml
+stata_path = "/usr/local/bin/stata-mp"
 ```
 
-Windows 用户注意路径使用双反斜杠。
+**无 Stata 自动降级**：`scripts/backends/__init__.py` 自动检测 Python linearmodels/statsmodels。
 
 ### 5. 验证安装
 
@@ -95,6 +100,10 @@ Agent 会在后台执行并展示给你结果。
 ```
 economic-paper-pipeline/
 ├── scripts/                    # 核心脚本
+│   ├── backends/               # Python 后端（自动检测 + 分析/验证）
+│   │   ├── __init__.py         # 能力检测 (detect())
+│   │   ├── python_analysis.py  # PanelOLS, DID, 异质性
+│   │   └── python_verify.py    # 稳健性检验套件
 │   ├── orchestrator.py         # 编排器（状态管理 + 模块路由）
 │   ├── pipeline.py             # 后向兼容入口
 │   ├── shared/                 # 共享层（契约 / 注册表 / 状态）
@@ -102,44 +111,32 @@ economic-paper-pipeline/
 │       ├── conceptualize/      # 概念助手
 │       ├── research/           # 调研助手
 │       ├── literature/         # 文献助手
-│       ├── data/               # 数据助手
-│       ├── analyze/            # 分析助手
-│       ├── verify/             # 验证助手
+│       ├── data/               # 数据助手（pandas 清洗）
+│       ├── analyze/            # 分析助手（Python 回归）
+│       ├── verify/             # 验证助手（Python 稳健性）
 │       ├── write/              # 论文助手
 │       └── format/             # 格式助手
-├── docs/                       # 文档
-├── config/                     # 配置
-├── templates/                  # 新项目模板
 ├── papers/                     # 你的所有论文项目
-│   ├── demo-paper/             # 示例项目
-│   └── my-first-paper/         # 你的第一篇论文
+│   ├── demo-paper/
+│   └── my-first-paper/
 │       ├── topics/             # 选题研究
 │       ├── literature/         # 文献综述
-│       ├── data/               # 数据
-│       ├── analysis/           # Stata 实证
+│       ├── data/               # raw/clean/scripts
+│       ├── analysis/           # output/do-files
 │       └── paper/              # LaTeX 论文源码
-├── .claude/                    # Claude 配置
-└── .mcp.json                   # MCP 服务器配置
+└── .mcp.json                   # MCP 服务器配置（可选）
 ```
 
 ---
 
-## Stata 包安装
+## Stata 包安装（仅旧版兼容需要）
 
-首次使用前，在 Stata 中安装必需包：
+Python 后端已替代 Stata `reghdfe`/`esttab`。仅在使用 Stata MCP 回溯时需要：
 
 ```stata
 ssc install estout, replace
-ssc install coefplot, replace
-ssc install outreg2, replace
 ssc install reghdfe, replace
 ssc install ftools, replace
-ssc install boottest, replace
-```
-
-也可以使用项目提供的 do 文件：
-```bash
-# 使用 stata-mcp 执行安装
 ```
 
 ---
@@ -191,7 +188,13 @@ tar -czf papers/my-project.tar.gz papers/my-project/
 # 或直接提交到 Git（推荐为每个项目创建独立仓库）
 ```
 
-### Q: Stata 执行乱码？
+### Q: Python 后端提示找不到模块？
+
+```bash
+pip install linearmodels statsmodels pandas numpy
+```
+
+### Q: Stata 执行乱码？（仅旧版兼容）
 
 确保：
 1. `.do` 文件使用 UTF-8 编码

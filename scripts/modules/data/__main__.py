@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """数据助手 — 独立运行入口"""
 import argparse, json
-from pathlib import Path
+from scripts.shared.paths import PAPERS_DIR
 from scripts.modules.data.core import run, commit_report
 
 
@@ -11,8 +11,7 @@ def main():
     parser.add_argument("--report", help="质量报告文本")
     args = parser.parse_args()
 
-    PROJECTS_DIR = Path.cwd() / "papers"
-    project_dir = PROJECTS_DIR / args.project if args.project else None
+    project_dir = PAPERS_DIR / args.project if args.project else None
 
     if args.report and project_dir:
         result = commit_report(args.report, project_dir)

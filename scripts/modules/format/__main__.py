@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """格式助手 — 独立运行入口"""
 import argparse
-from pathlib import Path
+from scripts.shared.paths import PAPERS_DIR
 from scripts.modules.format.core import run, compile_tex, detect_texlive
 
 
@@ -19,8 +19,7 @@ def main():
             print("❌ TeX Live 未安装")
         return
 
-    PROJECTS_DIR = Path.cwd() / "papers"
-    project_dir = PROJECTS_DIR / args.project if args.project else None
+    project_dir = PAPERS_DIR / args.project if args.project else None
 
     if args.compile and project_dir:
         tex_path = project_dir / "paper" / "main.tex"

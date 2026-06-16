@@ -1,12 +1,10 @@
 ---
 name: econ-new
-description: 创建新的论文项目
+description: 创建新论文项目
 ---
 
-当用户输入 `/econ-new <项目名>` 时：
-1. 调用 `python scripts/pipeline.py new <项目名>`
-2. 切换到新项目
-3. 告知用户已进入选题研究阶段
-4. 开始引导 5W1H 对话
-
-如果未提供项目名，追问用户。
+用户说"创建新论文"时：
+1. 询问项目名称（或从研究问题推断）
+2. 有 Python 后端 → 创建 `papers/<name>/` 目录 + 初始化 pipeline_state.json
+3. 无 Python 后端 → 对话记忆创建虚拟项目
+4. 进入 Conceptualize 概念引导流程

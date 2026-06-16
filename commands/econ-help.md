@@ -3,12 +3,14 @@ name: econ-help
 description: 显示所有可用 /econ-* 命令及其说明
 ---
 
-当用户输入 `/econ-help` 时：
-1. 列出此插件所有可用的 `/econ-*` 命令
-2. 按功能分组显示（项目管理、阶段跳转、编译等）
-3. 简要说明每个命令的作用
+当用户输入 `/econ-help` 时，列出所有能力：
+- Conceptualize — 概念引导 / 选题研究
+- Research — 文献 + 数据源搜索
+- Literature — 综述撰写
+- Data — 数据清洗
+- Analyze — 实证分析 / 回归
+- Verify — 稳健性检验
+- Write — 论文撰写
+- Format — 编译排版
 
-参考格式：
-- **项目管理**：`/econ-status` 查看进度，`/econ-list` 列出项目...
-- **阶段跳转**：`/econ-topic` 进入选题，`/econ-stata` 跑回归...
-- **编译**：`/econ-compile` 编译 LaTeX
+同时说明当前可用后端（Python/Stata/LLM-only）。

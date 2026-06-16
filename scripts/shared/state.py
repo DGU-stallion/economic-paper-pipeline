@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+from scripts.shared.paths import PAPERS_DIR, CONFIG_DIR
 
 
 DEFAULT_STATE = {
@@ -20,7 +21,7 @@ DEFAULT_STATE = {
 
 def get_project_path(project_name: str, papers_dir: Optional[Path] = None) -> Path:
     """获取项目路径"""
-    base = papers_dir or Path.cwd() / "papers"
+    base = papers_dir or PAPERS_DIR
     return base / project_name
 
 
@@ -70,7 +71,7 @@ def save(project_name: str, state: dict, papers_dir: Optional[Path] = None):
 def get_current_project(config_dir: Optional[Path] = None) -> Optional[str]:
     """获取当前激活的项目名称"""
     if config_dir is None:
-        config_dir = Path.cwd() / ".config"
+        config_dir = CONFIG_DIR
     current_file = config_dir / "current_project.json"
     if not current_file.exists():
         return None
@@ -82,7 +83,7 @@ def get_current_project(config_dir: Optional[Path] = None) -> Optional[str]:
 def set_current_project(project_name: str, config_dir: Optional[Path] = None):
     """设置当前激活的项目"""
     if config_dir is None:
-        config_dir = Path.cwd() / ".config"
+        config_dir = CONFIG_DIR
     config_dir.mkdir(parents=True, exist_ok=True)
     current_file = config_dir / "current_project.json"
     with open(current_file, "w", encoding="utf-8") as f:
@@ -92,7 +93,7 @@ def set_current_project(project_name: str, config_dir: Optional[Path] = None):
 def list_projects(papers_dir: Optional[Path] = None) -> List[str]:
     """列出所有项目"""
     if papers_dir is None:
-        papers_dir = Path.cwd() / "papers"
+        papers_dir = PAPERS_DIR
     if not papers_dir.exists():
         return []
     return sorted([p.name for p in papers_dir.iterdir() if p.is_dir()])

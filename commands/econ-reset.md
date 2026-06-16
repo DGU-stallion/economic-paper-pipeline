@@ -1,9 +1,10 @@
 ---
 name: econ-reset
-description: 重置当前项目（需二次确认）
+description: 重置当前项目到初始状态
 ---
 
-当用户输入 `/econ-reset` 时：
-1. 首先确认用户是否真的要重置：**"确定要重置「项目名」吗？这将清除所有进度，不可恢复。"**
-2. 用户确认后，调用 `python scripts/pipeline.py reset`
-3. 项目回到选题研究阶段
+用户说"从头开始"时：
+1. 确认是否真的要重置（不可逆）
+2. 确认后 → 清空 context_store + 状态回退到概念引导初始化
+3. 有 Python 后端：更新 pipeline_state.json
+4. 对话模式：清空对话记忆中的项目状态
