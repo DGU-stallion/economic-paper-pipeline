@@ -24,9 +24,10 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 # ============================================================
-# 路径配置
+# 路径配置（自动适配项目结构）
 # ============================================================
-PROJECT_ROOT = Path("D:/Project/economic-paper-pipeline")
+_SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = _SCRIPT_DIR.parent.parent  # papers/demo-paper/
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 CLEAN_DIR = PROJECT_ROOT / "data" / "clean"
 SCRIPTS_DIR = PROJECT_ROOT / "data" / "scripts"

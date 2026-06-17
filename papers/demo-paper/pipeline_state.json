@@ -1,0 +1,72 @@
+{
+  "current_micro_state": "data-validate",
+  "micro_state_history": [
+    "concept-init",
+    "concept-5w1h",
+    "concept-gap",
+    "concept-smart",
+    "concept-proposal",
+    "research-search",
+    "literature-review",
+    "data-diagnosis",
+    "data-plan",
+    "data-clean",
+    "data-validate"
+  ],
+  "stage_completed": [
+    "conceptualize",
+    "research",
+    "literature",
+    "data"
+  ],
+  "context_store": {
+    "research_question": "数字经济对制造业就业结构的影响——基于中国省级面板数据的实证研究",
+    "y_var": "tertiary_employment_share",
+    "d_var": "digital_economy_index",
+    "identification": "FE",
+    "hypotheses": [
+      "数字经济显著提升第三产业就业占比",
+      "数字经济对就业结构的影响存在区域异质性"
+    ],
+    "control_vars": [
+      "gdp_percapita",
+      "urbanization_rate",
+      "fixed_capital_investment",
+      "export_share",
+      "government_expenditure",
+      "education_expenditure"
+    ],
+    "clean_data_path": "papers/demo-paper/data/clean/panel_clean.parquet",
+    "data_quality_report": "papers/demo-paper/data/00_diagnosis_report.md",
+    "candidate_papers": [],
+    "data_sources": ["Figshare PONE-D-25-41664"],
+    "feasibility_verdict": "数据可用，核心变量完整"
+  },
+  "user_inputs": {
+    "initial_topic": "数字经济对就业影响",
+    "refined_topic": "数字经济对制造业企业就业结构的影响"
+  },
+  "decisions": [
+    {
+      "id": "dec-001",
+      "decision": "研究方向：数字经济对中国制造业就业结构的影响",
+      "category": "research_topic",
+      "confirmed": true
+    },
+    {
+      "id": "dec-002",
+      "decision": "Y=tertiary_employment_share, D=digital_economy_index",
+      "category": "variable_selection",
+      "confirmed": true
+    },
+    {
+      "id": "dec-003",
+      "decision": "识别策略：双向固定效应 (FE)",
+      "category": "identification",
+      "confirmed": true
+    }
+  ],
+  "template": "economic-research",
+  "project_name": "demo-paper",
+  "created_at": "2026-05-15T23:43:22.635933"
+}

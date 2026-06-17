@@ -1,7 +1,12 @@
 """清理面板数据：删除全空列，导出 .dta 供 Stata 使用"""
+from pathlib import Path
 import pandas as pd
 
-df = pd.read_csv("D:/Project/economic-paper-pipeline/data/clean/china_provincial_panel_2011_2023.csv")
+_SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = _SCRIPT_DIR.parent.parent
+CLEAN_DIR = PROJECT_ROOT / "data" / "clean"
+
+df = pd.read_csv(CLEAN_DIR / "china_provincial_panel_2011_2023.csv")
 
 print(f"原始数据: {df.shape[0]} 行 × {df.shape[1]} 列")
 
@@ -28,7 +33,7 @@ print(f"省份数: {df_clean['province_en'].nunique()}, 年份范围: {df_clean[
 
 # 导出 .dta (Stata 14 兼容)
 df_clean.to_stata(
-    "D:/Project/economic-paper-pipeline/data/clean/china_provincial_panel.dta",
+    CLEAN_DIR / "china_provincial_panel.dta",
     write_index=False,
     version=118  # Stata 14+
 )
