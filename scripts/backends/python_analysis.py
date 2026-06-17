@@ -323,9 +323,8 @@ def _tex_name(name: str) -> str:
     return name.replace("_", "\\_")
 
 def _generate_baseline_tex(result: dict) -> str:
-    """Generate LaTeX table from baseline results (side-by-side models)."""
+    """Generate publication-quality baseline table with model stats."""
     now = datetime.now().isoformat(timespec="minutes")
-    # Determine number of models
     model_keys = [k for k in ("m1", "m2") if result.get("models", {}).get(k)]
     n_models = len(model_keys)
     col_spec = "l" + "c" * n_models
@@ -334,74 +333,134 @@ def _generate_baseline_tex(result: dict) -> str:
     rows = []
     for v in result.get("variables", []):
         name = v.get("name", "")
-        # Coefficient row
         coefs = []
+        ses = []
         for mk in model_keys:
             entry = v.get(mk)
             if entry:
                 coefs.append(f"{entry['coef']}{_tex_sig(entry['sig'])}")
+                ses.append(f"({entry['se']})" if entry.get("se") else "")
             else:
                 coefs.append("")
-        rows.append(f"{_tex_name(name)} & " + " & ".join(coefs) + " \\\\")
-        # SE row (skip if all blank)
-        ses = []
-        for mk in model_keys:
-            entry = v.get(mk)
-            if entry and entry.get("se"):
-                ses.append(f"({entry['se']})")
-            else:
                 ses.append("")
+        rows.append(f"{_tex_name(name)} & " + " & ".join(coefs) + " \\\\")
         if any(ses):
             rows.append("  & " + " & ".join(ses) + " \\\\")
 
-    return f"""\
-% 基准回归结果 (Python PanelOLS, {now})
-\\begin{{table}}[htbp]
-\\centering
-\\caption{{{result.get('caption', '基准回归结果')}}}
-\\label{{tab:main}}
-\\def\\sym#1{{\\ifmmode^{{#1}}\\else\\(^{{#1}}\\)\\fi}}
-\\begin{{tabular}}{{{col_spec}}}
-\\toprule
-{col_headers} \\\\
-\\midrule
-{chr(10).join(rows) if rows else '  % (待填充)'}
-\\bottomrule
-\\end{{tabular}}
-\\end{{table}}
-"""
+    # Model statistics rows
+    rows.append(r"\midrule")
+    r2_parts = ["R²"]
+    n_parts = ["样本量"]
+    for mk in model_keys:
+        m = result["models"][mk]
+        r2_parts.append(f"{m['r_squared']:.4f}")
+        n_parts.append(str(m["n"]))
+    rows.append(" & ".join(r2_parts) + " \\\\")
+    rows.append(" & ".join(n_parts) + " \\\\")
+
+    # Footnotes (build raw strings to avoid f-string escaping headache)
+    ncols = n_models + 1
+    fn1 = r"\multicolumn{" + str(ncols) + r"}{l}{\footnotesize 括号内为聚类稳健标准误（省份层面）。}\\"
+    fn2 = r"\multicolumn{" + str(ncols) + r"}{l}{\footnotesize * $p<0.10$, ** $p<0.05$, *** $p<0.01$}\\"
+
+    return (
+        "% 基准回归结果 (Python PanelOLS, " + now + ")\n"
+        + r"\begin{table}[htbp]" + "\n"
+        + r"\centering" + "\n"
+        + r"\caption{" + result.get("caption", "基准回归结果") + "}" + "\n"
+        + r"\label{tab:main}" + "\n"
+        + r"\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" + "\n"
+        + r"\begin{tabular}{" + col_spec + "}" + "\n"
+        + r"\toprule" + "\n"
+        + col_headers + r" \\" + "\n"
+        + r"\midrule" + "\n"
+        + ("\n".join(rows) if rows else "  % (待填充)") + "\n"
+        + r"\bottomrule" + "\n"
+        + fn1 + "\n"
+        + fn2 + "\n"
+        + r"\end{tabular}" + "\n"
+        + r"\end{table}"
+    )
 
 
 def _generate_heterogeneity_tex(result: dict) -> str:
-    """Generate LaTeX table from heterogeneity results."""
+    """Generate publication-quality heterogeneity table."""
     now = datetime.now().isoformat(timespec="minutes")
-    rows = []
-    for g in result.get("groups", []):
-        name = g.get("name", "")
-        coef = g.get("coef", "?")
-        sig = g.get("sig", "")
-        n = g.get("n", "")
-        rows.append(f"{_tex_name(name)} & {coef}{_tex_sig(sig)} & {n} \\\\")
-        se = g.get("se", "")
-        if se:
-            rows.append(f"  & ({se}) & \\\\")
+    groups = result.get("groups", [])
+    n_groups = len(groups)
+    col_spec = "l" + "c" * n_groups if n_groups > 0 else "lc"
 
-    return f"""\
-% 异质性分析 (Python PanelOLS, {now})
-\\begin{{table}}[htbp]
-\\centering
-\\caption{{{result.get('caption', '异质性分析')}}}
-\\label{{tab:heterogeneity}}
-\\def\\sym#1{{\\ifmmode^{{#1}}\\else\\(^{{#1}}\\)\\fi}}
-\\begin{{tabular}}{{lcc}}
-\\toprule
- 分组 & 系数 & 样本量 \\\\
-\\midrule
-{chr(10).join(rows) if rows else '  % (待填充)'}
-\\bottomrule
-\\end{{tabular}}
-\\end{{table}}
-"""
+    if n_groups <= 1:
+        # Simple single-column layout
+        rows = []
+        for g in groups:
+            name = g.get("name", "")
+            coef = g.get("coef", "?")
+            sig = g.get("sig", "")
+            n = g.get("n", "")
+            rows.append(f"{_tex_name(name)} & {coef}{_tex_sig(sig)} & {n} \\\\")
+            se = g.get("se", "")
+            if se:
+                rows.append(f"  & ({se}) & \\\\")
+        return (
+            "% 异质性分析 (Python PanelOLS, " + now + ")\n"
+            + r"\begin{table}[htbp]" + "\n"
+            + r"\centering" + "\n"
+            + r"\caption{" + result.get("caption", "异质性分析") + "}" + "\n"
+            + r"\label{tab:heterogeneity}" + "\n"
+            + r"\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" + "\n"
+            + r"\begin{tabular}{lcc}" + "\n"
+            + r"\toprule" + "\n"
+            + r" 分组 & 系数 & 样本量 \\" + "\n"
+            + r"\midrule" + "\n"
+            + ("\n".join(rows) if rows else "  % (待填充)") + "\n"
+            + r"\bottomrule" + "\n"
+            + r"\multicolumn{3}{l}{\footnotesize 括号内为聚类稳健标准误。}\\" + "\n"
+            + r"\multicolumn{3}{l}{\footnotesize * $p<0.10$, ** $p<0.05$, *** $p<0.01$}\\" + "\n"
+            + r"\end{tabular}" + "\n"
+            + r"\end{table}"
+        )
+
+    # Side-by-side: each group gets a column
+    header_parts = [""]
+    for g in groups:
+        header_parts.append(f"\\multicolumn{{1}}{{c}}{{{g['name']}}}")
+    col_header = " & ".join(header_parts)
+
+    # Coefficient row
+    coef_parts = [_tex_name(result.get('coef_label', '系数'))]
+    se_parts = ["标准误"]
+    n_parts = ["样本量"]
+    for g in groups:
+        coef_parts.append(f"{g['coef']}{_tex_sig(g['sig'])}")
+        se_parts.append(f"({g['se']})" if g.get("se") else "")
+        n_parts.append(str(g["n"]))
+    rows = [
+        " & ".join(coef_parts) + " \\\\",
+        " & ".join(se_parts) + " \\\\",
+        " & ".join(n_parts) + " \\\\",
+    ]
+
+    fn1 = r"\multicolumn{" + str(n_groups + 1) + r"}{l}{\footnotesize 括号内为聚类稳健标准误。}\\"
+    fn2 = r"\multicolumn{" + str(n_groups + 1) + r"}{l}{\footnotesize * $p<0.10$, ** $p<0.05$, *** $p<0.01$}\\"
+    return (
+        "% 异质性分析 (Python PanelOLS, " + now + ")\n"
+        + r"\begin{table}[htbp]" + "\n"
+        + r"\centering" + "\n"
+        + r"\caption{" + result.get("caption", "异质性分析") + "}" + "\n"
+        + r"\label{tab:heterogeneity}" + "\n"
+        + r"\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" + "\n"
+        + r"\begin{tabular}{" + col_spec + "}" + "\n"
+        + r"\toprule" + "\n"
+        + col_header + r" \\" + "\n"
+        + r"\midrule" + "\n"
+        + "\n".join(rows) + "\n"
+        + r"\bottomrule" + "\n"
+        + fn1 + "\n"
+        + fn2 + "\n"
+        + r"\end{tabular}" + "\n"
+        + r"\end{table}"
+    )
 
 
 def _generate_did_tex(result: dict) -> str:
