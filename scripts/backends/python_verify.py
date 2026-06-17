@@ -228,11 +228,15 @@ def _make_test(name: str, panel_res, d_var: str, error: str = "") -> dict:
     }
 
 
+def _tex_sig(sig: str) -> str:
+    """Wrap significance stars in \\sym{}. Returns empty string if no sig."""
+    return f"\\sym{{{sig}}}" if sig else ""
+
 def _generate_robustness_tex(result: dict) -> str:
     now = datetime.now().isoformat(timespec="minutes")
     rows = []
     for t in result.get("tests", []):
-        rows.append(f"{t['name']} & {t['coef']}{t['sig']} & {t['conclusion']} \\\\")
+        rows.append(f"{t['name']} & {t['coef']}{_tex_sig(t['sig'])} & {t['conclusion']} \\\\")
     conclusion = result.get("conclusion", "")
     return f"""\
 % 稳健性检验 (Python, {now})
@@ -240,11 +244,12 @@ def _generate_robustness_tex(result: dict) -> str:
 \\centering
 \\caption{{稳健性检验结果}}
 \\label{{tab:robustness}}
+\\def\\sym#1{{\\ifmmode^{{#1}}\\else\\(^{{#1}}\\)\\fi}}
 \\begin{{tabular}}{{lcc}}
 \\toprule
 检验 & 系数 & 结论 \\\\
 \\midrule
-{chr(10).join(rows) if rows else '  % (空)'} \\\\
+{chr(10).join(rows) if rows else '  % (空)'}
 \\bottomrule
 \\end{{tabular}}
 \\end{{table}}

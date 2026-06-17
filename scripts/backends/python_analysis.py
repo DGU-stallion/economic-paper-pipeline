@@ -271,36 +271,24 @@ def _extract_vars(
     d_var: str,
     controls: Optional[List[str]],
 ) -> List[dict]:
-    """Build variable rows for LaTeX table."""
+    """Build variable rows for side-by-side model LaTeX table.
+
+    Each entry has keys: name, m1 (dict or None), m2 (dict or None).
+    Per-model dict: {coef, se, sig}.
+    """
     variables = []
+    all_names = [d_var] + (controls or [])
 
-    # D variable from M1
-    variables.append({
-        "name": d_var,
-        "coef": f"{float(m1.params.get(d_var, 0)):.4f}",
-        "se": f"{float(m1.std_errors.get(d_var, 0)):.4f}",
-        "sig": _sig_stars(float(m1.pvalues.get(d_var, 1))),
-    })
-
-    if m2 is not None:
-        # D variable from M2
-        variables.append({
-            "name": d_var,
-            "coef": f"{float(m2.params.get(d_var, 0)):.4f}",
-            "se": f"{float(m2.std_errors.get(d_var, 0)):.4f}",
-            "sig": _sig_stars(float(m2.pvalues.get(d_var, 1))),
-        })
-
-        # Control variables from M2
-        if controls:
-            for c in controls:
-                if c in m2.params:
-                    variables.append({
-                        "name": c,
-                        "coef": f"{float(m2.params[c]):.4f}",
-                        "se": f"{float(m2.std_errors[c]):.4f}",
-                        "sig": _sig_stars(float(m2.pvalues[c])),
-                    })
+    for name in all_names:
+        entry: dict = {"name": name, "m1": None, "m2": None}
+        for model_key, mod in [("m1", m1), ("m2", m2)]:
+            if mod is not None and name in mod.params:
+                entry[model_key] = {
+                    "coef": f"{float(mod.params[name]):.4f}",
+                    "se": f"{float(mod.std_errors[name]):.4f}",
+                    "sig": _sig_stars(float(mod.pvalues[name])),
+                }
+        variables.append(entry)
 
     return variables
 
@@ -325,31 +313,59 @@ def _sig_stars(pval: float) -> str:
         return "*"
     return ""
 
+def _tex_sig(sig: str) -> str:
+    """Wrap significance stars in \\sym{}. Returns empty string if no sig."""
+    return f"\\sym{{{sig}}}" if sig else ""
+
+
+def _tex_name(name: str) -> str:
+    """Sanitize variable names for LaTeX (escape underscores)."""
+    return name.replace("_", "\\_")
 
 def _generate_baseline_tex(result: dict) -> str:
-    """Generate LaTeX table from baseline results."""
+    """Generate LaTeX table from baseline results (side-by-side models)."""
     now = datetime.now().isoformat(timespec="minutes")
+    # Determine number of models
+    model_keys = [k for k in ("m1", "m2") if result.get("models", {}).get(k)]
+    n_models = len(model_keys)
+    col_spec = "l" + "c" * n_models
+    col_headers = " & " + " & ".join(f"({i+1})" for i in range(n_models))
+
     rows = []
     for v in result.get("variables", []):
-        coef = v.get("coef", "?")
-        se = v.get("se", "")
-        sig = v.get("sig", "")
         name = v.get("name", "")
-        rows.append(f"{name} & {coef}{sig} \\\\")
-        if se:
-            rows.append(f"  & ({se}) \\\\")
+        # Coefficient row
+        coefs = []
+        for mk in model_keys:
+            entry = v.get(mk)
+            if entry:
+                coefs.append(f"{entry['coef']}{_tex_sig(entry['sig'])}")
+            else:
+                coefs.append("")
+        rows.append(f"{_tex_name(name)} & " + " & ".join(coefs) + " \\\\")
+        # SE row (skip if all blank)
+        ses = []
+        for mk in model_keys:
+            entry = v.get(mk)
+            if entry and entry.get("se"):
+                ses.append(f"({entry['se']})")
+            else:
+                ses.append("")
+        if any(ses):
+            rows.append("  & " + " & ".join(ses) + " \\\\")
 
     return f"""\
 % 基准回归结果 (Python PanelOLS, {now})
 \\begin{{table}}[htbp]
 \\centering
 \\caption{{{result.get('caption', '基准回归结果')}}}
-\\label{{tab:baseline}}
-\\begin{{tabular}}{{lcc}}
+\\label{{tab:main}}
+\\def\\sym#1{{\\ifmmode^{{#1}}\\else\\(^{{#1}}\\)\\fi}}
+\\begin{{tabular}}{{{col_spec}}}
 \\toprule
- & (1) & (2) \\\\
+{col_headers} \\\\
 \\midrule
-{chr(10).join(rows) if rows else '  % (待填充)'} \\\\
+{chr(10).join(rows) if rows else '  % (待填充)'}
 \\bottomrule
 \\end{{tabular}}
 \\end{{table}}
@@ -365,7 +381,7 @@ def _generate_heterogeneity_tex(result: dict) -> str:
         coef = g.get("coef", "?")
         sig = g.get("sig", "")
         n = g.get("n", "")
-        rows.append(f"{name} & {coef}{sig} & {n} \\\\")
+        rows.append(f"{_tex_name(name)} & {coef}{_tex_sig(sig)} & {n} \\\\")
         se = g.get("se", "")
         if se:
             rows.append(f"  & ({se}) & \\\\")
@@ -376,11 +392,12 @@ def _generate_heterogeneity_tex(result: dict) -> str:
 \\centering
 \\caption{{{result.get('caption', '异质性分析')}}}
 \\label{{tab:heterogeneity}}
+\\def\\sym#1{{\\ifmmode^{{#1}}\\else\\(^{{#1}}\\)\\fi}}
 \\begin{{tabular}}{{lcc}}
 \\toprule
-分组 & 系数 & 样本量 \\\\
+ 分组 & 系数 & 样本量 \\\\
 \\midrule
-{chr(10).join(rows) if rows else '  % (待填充)'} \\\\
+{chr(10).join(rows) if rows else '  % (待填充)'}
 \\bottomrule
 \\end{{tabular}}
 \\end{{table}}
@@ -396,9 +413,10 @@ def _generate_did_tex(result: dict) -> str:
 \\centering
 \\caption{{双重差分 (DID) 结果}}
 \\label{{tab:did}}
+\\def\\sym#1{{\\ifmmode^{{#1}}\\else\\(^{{#1}}\\)\\fi}}
 \\begin{{tabular}}{{lc}}
 \\toprule
-DID (Treat×Post) & {result.get('did_coef', '?')}{result.get('did_sig', '')} \\\\
+DID (Treat×Post) & {result.get('did_coef', '?')}{_tex_sig(result.get('did_sig', ''))} \\\\
   & ({result.get('did_se', '?')}) \\\\
 R² & {result.get('r_squared', '?')} \\\\
 N & {result.get('n', '?')} \\\\
