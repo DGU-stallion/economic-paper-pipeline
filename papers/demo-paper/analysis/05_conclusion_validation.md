@@ -1,7 +1,7 @@
 # 结论验证报告
 
 > 生成日期：2026-05-12
-> 对比来源：`topics/00_research_proposal.md`（研究假设）↔ Stage 4 Stata 实证输出
+> 对比来源：`topics/00_research_proposal.md`（研究假设）↔ 实证分析输出
 
 ## 研究假设验证矩阵
 

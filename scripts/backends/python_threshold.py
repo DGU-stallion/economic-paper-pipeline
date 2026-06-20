@@ -1,6 +1,11 @@
 # Python backend — Hansen (1999) panel threshold regression.
 # Grid search over threshold variable, PanelOLS per candidate, RSS minimization.
 # Produces .tex table matching Stata output.
+#
+# Optional external: thrreg (github.com/mlkremer/thrreg) — R package.
+# If installed via rpy2, can delegate to thrreg::thr_reg() for verified Hansen 2000.
+# Benefits: more mature implementation, likelihood ratio test for threshold significance.
+# Current: pure Python grid search (works without R).
 
 from __future__ import annotations
 from datetime import datetime
@@ -10,6 +15,17 @@ from typing import List, Optional
 import pandas as pd
 import numpy as np
 from linearmodels.panel import PanelOLS
+
+
+# ── Optional thrreg bridge (R package) ──
+HAS_THRREG = False
+try:
+    import rpy2.robjects as ro
+    from rpy2.robjects.packages import importr
+    importr("thrreg")
+    HAS_THRREG = True
+except (ImportError, Exception):
+    pass
 
 
 # ── Public API ──

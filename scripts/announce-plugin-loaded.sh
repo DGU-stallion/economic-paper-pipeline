@@ -47,7 +47,7 @@ if [ "$SOURCE" = "startup" ] || [ "$SOURCE" = "clear" ]; then
   echo "additionalContext::  /econ-use        切换项目"
   echo "additionalContext::  /econ-topic      选题研究"
   echo "additionalContext::  /econ-literature 文献综述"
-  echo "additionalContext::  /econ-stata      Stata 实证回归"
+  echo "additionalContext::  /econ-analyze    回归分析"
   echo "additionalContext::  /econ-paper      LaTeX 论文撰写"
   echo "additionalContext::  /econ-advance    推进到下一阶段"
   echo "additionalContext::"
@@ -82,7 +82,7 @@ else
             topic) STAGE_NAME="选题研究" ;;
             literature) STAGE_NAME="文献综述" ;;
             data) STAGE_NAME="数据清洗" ;;
-            stata) STAGE_NAME="Stata实证" ;;
+            analyze) STAGE_NAME="回归分析" ;;
             robustness) STAGE_NAME="稳健性检验" ;;
             conclusion) STAGE_NAME="结论验证" ;;
             paper) STAGE_NAME="论文撰写" ;;

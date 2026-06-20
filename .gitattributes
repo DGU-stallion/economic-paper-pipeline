@@ -1,6 +1,5 @@
 * text=auto
 *.sh text eol=lf
-*.do text eol=lf
 *.tex text eol=lf
 *.py text eol=lf
 *.json text eol=lf

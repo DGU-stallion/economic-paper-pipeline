@@ -1,4 +1,4 @@
-"""清理面板数据：删除全空列，导出 .dta 供 Stata 使用"""
+"""清理面板数据：删除全空列，导出 .dta 格式"""
 from pathlib import Path
 import pandas as pd
 
@@ -31,11 +31,11 @@ print(f"清洗后: {df_clean.shape[0]} 行 × {df_clean.shape[1]} 列")
 print(f"变量列表: {df_clean.columns.tolist()}")
 print(f"省份数: {df_clean['province_en'].nunique()}, 年份范围: {df_clean['year'].min()}-{df_clean['year'].max()}")
 
-# 导出 .dta (Stata 14 兼容)
+# 导出 .dta（便携格式，pandas/polars 均可读取）
 df_clean.to_stata(
     CLEAN_DIR / "china_provincial_panel.dta",
     write_index=False,
-    version=118  # Stata 14+
+    version=118
 )
 
 print("\n.dta 已导出: data/clean/china_provincial_panel.dta")

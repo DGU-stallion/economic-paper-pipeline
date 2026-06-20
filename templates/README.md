@@ -7,13 +7,11 @@
 ```
 your-paper/
 ├── data/
-│   ├── raw/          <- 把你的原始数据放在这里（.dta, .csv, .xlsx）
-│   ├── clean/        <- 清洗后的数据自动生成到这里
-│   └── scripts/      <- 数据清洗 Stata 脚本
+│   ├── raw/          <- 原始数据（.dta, .csv, .xlsx）
+│   ├── clean/        <- 清洗后数据
+│   └── scripts/      <- 数据清洗脚本
 ├── analysis/
-│   ├── do-files/     <- 回归分析 do 文件
-│   ├── output/       <- 回归结果 .tex 表格自动输出到这里
-│   ├── logs/         <- Stata 运行日志
+│   ├── output/       <- 回归结果 .tex 表格
 │   └── references/   <- 方法参考文档
 ├── topics/           <- 选题研究、5W1H 分析报告
 ├── literature/       <- 文献综述和参考文献

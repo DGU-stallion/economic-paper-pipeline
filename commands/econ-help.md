@@ -13,4 +13,4 @@ description: 显示所有可用 /econ-* 命令及其说明
 - Write — 论文撰写
 - Format — 编译排版
 
-同时说明当前可用后端（Python/Stata/LLM-only）。
+同时说明当前可用后端（Python/LLM-only）。

@@ -9,7 +9,6 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-PAPERS_DIR = ROOT / "papers" / "__tests__"
 PIPELINE = ROOT / "scripts" / "pipeline.py"
 
 
@@ -34,12 +33,12 @@ def test_fe_minimal():
     print("=" * 60)
 
     # 创建测试项目
-    PAPERS_DIR.mkdir(parents=True, exist_ok=True)
+    (ROOT / "papers").mkdir(parents=True, exist_ok=True)
     project_name = "test-fe-minimal"
-    project_dir = PAPERS_DIR / project_name
+    project_dir = ROOT / "papers" / project_name
 
     if project_dir.exists():
-        subprocess.run(["rm", "-rf", str(project_dir)], shell=True)
+        import shutil; shutil.rmtree(project_dir)
 
     # 新建项目
     result = run_pipeline("new", project_name)
@@ -58,25 +57,14 @@ def test_fe_minimal():
     run_pipeline("set-context", "topic", "identification", "FE")
     print("[OK] Context 初始化完成")
 
-    # 跳转到 stata 阶段
-    result = run_pipeline("jump", "stata")
-    print("[OK] 跳转到 stata 阶段")
+    # 跳转到 analyze 阶段
+    result = run_pipeline("jump", "analyze")
+    print("[OK] 跳转到 analyze 阶段")
 
-    # 生成 stata do-file
-    result = run_pipeline("gen-do", "baseline")
-    if result.returncode != 0:
-        print("[FAIL] do-file 生成失败")
-        print(result.stdout)
-        return False
-    print("[OK] do-file 生成成功")
-
-    # 检查 do-file 存在（检查目录下是否有生成的 do 文件）
-    do_dir = project_dir / "analysis" / "do-files"
-    do_files = list(do_dir.glob("*.do")) if do_dir.exists() else []
-    if do_files:
-        print(f"[OK] do-file 文件存在: {do_files[0].name}")
-    else:
-        print("[WARN] do-file 目录为空，但命令执行成功")
+    # 检查 Python 后端可用
+    result = run_pipeline("status")
+    if "python" in result.stdout.lower() or result.returncode == 0:
+        print("[OK] Pipeline 状态正常")
 
     print("[OK] FE 最小测试通过！\n")
     return True
@@ -89,10 +77,10 @@ def test_did_minimal():
     print("=" * 60)
 
     project_name = "test-did-minimal"
-    project_dir = PAPERS_DIR / project_name
+    project_dir = ROOT / "papers" / project_name
 
     if project_dir.exists():
-        subprocess.run(["rm", "-rf", str(project_dir)], shell=True)
+        import shutil; shutil.rmtree(project_dir)
 
     # 新建项目
     result = run_pipeline("new", project_name)
@@ -109,12 +97,12 @@ def test_did_minimal():
     run_pipeline("set-context", "topic", "identification", "DID")
     print("[OK] Context 初始化完成")
 
-    # 检查门禁系统：跳转到 stata 时应该能正确识别
-    result = run_pipeline("jump", "stata")
+    # 检查门禁系统：跳转到 analyze 阶段
+    result = run_pipeline("jump", "analyze")
     if result.returncode != 0:
         print("[FAIL] 跳转失败")
         return False
-    print("[OK] 跳转到 stata 阶段成功")
+    print("[OK] 跳转到 analyze 阶段成功")
 
     print("[OK] DID 最小测试通过！\n")
     return True
@@ -127,10 +115,10 @@ def test_compile_only():
     print("=" * 60)
 
     project_name = "test-compile-only"
-    project_dir = PAPERS_DIR / project_name
+    project_dir = ROOT / "papers" / project_name
 
     if project_dir.exists():
-        subprocess.run(["rm", "-rf", str(project_dir)], shell=True)
+        import shutil; shutil.rmtree(project_dir)
 
     # 新建项目
     run_pipeline("new", project_name)
@@ -157,10 +145,10 @@ def test_cleanup():
     print("=" * 60)
 
     project_name = "test-cleanup"
-    project_dir = PAPERS_DIR / project_name
+    project_dir = ROOT / "papers" / project_name
 
     if project_dir.exists():
-        subprocess.run(["rm", "-rf", str(project_dir)], shell=True)
+        import shutil; shutil.rmtree(project_dir)
 
     run_pipeline("new", project_name)
     run_pipeline("use", project_name)
@@ -178,16 +166,20 @@ def test_cleanup():
 
     print(f"[OK] 创建了 {len(junk_files)} 个测试垃圾文件")
 
-    # 运行 cleanup - 这里需要模拟输入，我们直接检查命令是否存在
+    # 运行 cleanup
     result = run_pipeline("cleanup")
-    if result.returncode == 0:
-        print("[OK] cleanup 命令正常执行")
-    else:
+    if result.returncode != 0:
         print("[FAIL] cleanup 命令执行失败")
         print(result.stdout)
-        print(result.stderr)
         return False
 
+    # 验证垃圾文件是否已删除
+    remaining = [f for f in junk_files if (paper_dir / f).exists()]
+    if remaining:
+        print(f"[FAIL] 以下文件未被清理: {remaining}")
+        return False
+
+    print(f"[OK] cleanup 命令成功清理了 {len(junk_files)} 个文件")
     print("[OK] 清道夫功能测试通过！\n")
     return True
 

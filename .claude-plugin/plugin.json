@@ -11,9 +11,9 @@
   "keywords": [
     "economics",
     "econometrics",
-    "stata",
     "python",
     "statsmodels",
+    "linearmodels",
     "latex",
     "academic-research",
     "paper-writing",
@@ -23,8 +23,7 @@
   "requires": {
     "python": ">=3.11",
     "backends": {
-      "python-statsmodels": "recommended",
-      "stata": "optional",
+      "python-linearmodels": "recommended",
       "texlive": "optional"
     }
   }

@@ -13,7 +13,6 @@
 
 | 软件 | 版本要求 | 说明 |
 |------|---------|------|
-| **StataMP** | 18+ | 旧版兼容：若需 Stata 后端 |
 | **uv** | 最新版 | Python 包管理器，用于可选 MCP 服务器 |
 
 ### Claude Code 配置
@@ -37,7 +36,7 @@ cd economic-paper-pipeline
 pip install pandas numpy requests beautifulsoup4 yfinance openpyxl statsmodels linearmodels
 ```
 
-`linearmodels` 用于面板固定效应回归（替代 Stata `reghdfe`）。无 Stata 时自动使用 Python 后端。
+`linearmodels` 用于面板固定效应回归（替代传统 `reghdfe`）。
 
 ### 3. 验证后端
 
@@ -45,30 +44,7 @@ pip install pandas numpy requests beautifulsoup4 yfinance openpyxl statsmodels l
 python3 -c "from linearmodels.panel import PanelOLS; print('Python 后端就绪')"
 ```
 
-### 4. （可选）配置 Stata MCP
-
-仅在使用 Stata 后端时需要。编辑 `~/.claude/settings.json`：
-
-```json
-{
-  "mcpServers": {
-    "stata-mcp": {
-      "command": "uvx",
-      "args": ["stata-mcp"]
-    }
-  }
-}
-```
-
-配置 Stata 路径（macOS/Linux）：
-```bash
-# 创建 .statamcp/config.toml
-stata_path = "/usr/local/bin/stata-mp"
-```
-
-**无 Stata 自动降级**：`scripts/backends/__init__.py` 自动检测 Python linearmodels/statsmodels。
-
-### 5. 验证安装
+### 4. 验证安装
 
 在 Claude Code 中打开项目目录，Agent 会自动问候你。
 
@@ -122,21 +98,9 @@ economic-paper-pipeline/
 │       ├── topics/             # 选题研究
 │       ├── literature/         # 文献综述
 │       ├── data/               # raw/clean/scripts
-│       ├── analysis/           # output/do-files
+│       ├── analysis/           # output/
 │       └── paper/              # LaTeX 论文源码
 └── .mcp.json                   # MCP 服务器配置（可选）
-```
-
----
-
-## Stata 包安装（仅旧版兼容需要）
-
-Python 后端已替代 Stata `reghdfe`/`esttab`。仅在使用 Stata MCP 回溯时需要：
-
-```stata
-ssc install estout, replace
-ssc install reghdfe, replace
-ssc install ftools, replace
 ```
 
 ---
@@ -194,12 +158,12 @@ tar -czf papers/my-project.tar.gz papers/my-project/
 pip install linearmodels statsmodels pandas numpy
 ```
 
-### Q: Stata 执行乱码？（仅旧版兼容）
+### Q: Python 后端面板回归报错？
 
-确保：
-1. `.do` 文件使用 UTF-8 编码
-2. Stata 设置 `set locale_functions all on`
-3. 使用 stata-mcp 的 `read_log` 工具时指定 `encoding="utf-8"`
+确保 linearmodels 版本 ≥ 7.0：
+```bash
+pip install --upgrade linearmodels
+```
 
 ---
 

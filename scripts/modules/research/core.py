@@ -2,7 +2,18 @@
 """调研助手核心逻辑
 
 流程:
-  输入 → [LLM 生成搜索策略] → [web-access 执行搜索] → [LLM 整理结果] → 输出
+  输入 → [检测搜索后端] → [LLM 生成搜索策略] → [执行搜索] → [LLM 整理结果] → 输出
+
+搜索后端优先级（自动检测）:
+  1. Tavily (API key + pip 包): search / extract / crawl / map / research
+  2. paper-search-mcp (arXiv / Google Scholar / PubMed)
+  3. web-access CDP (浏览器自动化)
+  4. WebSearch / WebFetch (LLM 工具级，始终可用)
+
+数据收集增强:
+  - tavily_extract: 从 URL 提取干净 markdown，适合获取数据门户页面结构化内容
+  - tavily_crawl: 自动爬取数据门户所有链接，批量发现数据集
+  - tavily_map: 先探测站点 URL 结构，再精准抓取
 
 core.py 提供：
   - run() 入口（编排器调用）
@@ -10,7 +21,7 @@ core.py 提供：
   - 产出文件写入
   - 报告模板
 
-实际搜索由 LLM 使用 web-access 工具在对话层完成。
+实际搜索由 LLM 使用检测到的后端工具在对话层完成。
 """
 
 from __future__ import annotations
@@ -18,7 +29,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-import json
+from scripts.modules.research.search_backends import detect_all, get_primary, get_summary
 
 
 # ── 数据结构 ──
@@ -58,9 +69,10 @@ def run(
     """运行调研助手（准备阶段）
 
     这个函数负责：
-      1. 验证输入完整性
-      2. 创建产出目录
-      3. 返回初始化的空结构（供 LLM 填充）
+      1. 检测可用搜索后端
+      2. 验证输入完整性
+      3. 创建产出目录
+      4. 返回初始化的空结构（供 LLM 填充），含后端状态
 
     LLM 在对话中实际执行搜索，然后调用 commit_results() 写入产出。
 
@@ -76,17 +88,24 @@ def run(
     if keywords is None:
         keywords = []
 
+    # 检测可用搜索后端
+    backends = detect_all()
+    primary = get_primary(backends)
+    summary = get_summary(backends)
+
     # 创建产出目录
     if project_dir:
         lit_dir = project_dir / "literature"
         data_dir = project_dir / "data"
         lit_dir.mkdir(parents=True, exist_ok=True)
-        data_dir.mkdir(parents=True, exist_ok=True)
 
     return {
         "candidate_papers": [],
         "data_sources": [],
         "feasibility_verdict": "needs_adjustment",
+        "search_backend_used": primary["name"],
+        "_backend_summary": summary,
+        "_backend_detail": backends,
     }
 
 

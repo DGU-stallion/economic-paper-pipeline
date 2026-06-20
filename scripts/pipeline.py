@@ -162,6 +162,41 @@ def cmd_graph(args=None):
     print(f"校验: {'✅ 无警告' if not _registry.validate_all() else '⚠️ 有警告'}")
 
 
+def cmd_cleanup(args=None):
+    """删除当前论文项目的 LaTeX 编译垃圾文件"""
+    project_name = get_current_project()
+    if not project_name:
+        print("❌ 未选择项目，先使用 `use` 切换")
+        return
+    paper_dir = get_project_path(project_name) / "paper"
+    if not paper_dir.exists():
+        print(f"⚠️ 项目 '{project_name}' 无 paper/ 目录")
+        return
+
+    junk_exts = {".aux", ".bbl", ".blg", ".bcf", ".log", ".out", ".run.xml",
+                 ".toc", ".synctex.gz", ".fdb_latexmk", ".fls", ".lof", ".lot",
+                 ".nav", ".snm", ".vrb", ".brf", ".nlo", ".nls"}
+    deleted = []
+    for f in paper_dir.iterdir():
+        if f.suffix in junk_exts or f.name in ("texput.log", "compile.log", "xelatex_output.txt"):
+            f.unlink()
+            deleted.append(f.name)
+
+    # 清理 tables/ 子目录下的 .log 文件
+    tables_dir = paper_dir / "tables"
+    if tables_dir.exists():
+        for f in tables_dir.glob("*.log"):
+            f.unlink()
+            deleted.append(f"tables/{f.name}")
+
+    if deleted:
+        print(f"✅ 清理了 {len(deleted)} 个文件:")
+        for name in sorted(deleted):
+            print(f"   🗑️  {name}")
+    else:
+        print("✅ 无需清理")
+
+
 def cmd_states(args=None):
     """列出所有模块的状态（简化版）"""
     print("可用模块:\n")
@@ -182,6 +217,7 @@ _COMMANDS = {
     "prompt": cmd_prompt,
     "graph": cmd_graph,
     "states": cmd_states,
+    "cleanup": cmd_cleanup,
     "help": lambda _: print("可用命令: " + ", ".join(sorted(_COMMANDS.keys()))),
 }
 

@@ -55,5 +55,9 @@ MODULE_CONTRACT = ModuleContract(
             type="str", required=True,
             desc="可行性结论：'feasible' / 'needs_adjustment' / 'infeasible'",
         ),
+        "search_backend_used": FieldSpec(
+            type="str", required=False,
+            desc="实际使用的搜索后端，如 'tavily' / 'paper-search-mcp' / 'websearch-webfetch'",
+        ),
     },
 )

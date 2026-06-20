@@ -14,13 +14,6 @@ papers/*
 !papers/demo-paper/*
 
 # ========================
-# Stata outputs and logs
-# ========================
-papers/*/analysis/logs/*.log
-papers/*/analysis/logs/*.smcl
-papers/*/analysis/logs/*.dta
-
-# ========================
 # Pipeline state (machine-local)
 # ========================
 papers/*/pipeline_state.json
@@ -28,15 +21,13 @@ papers/*/conversation.json
 papers/*/context/
 
 # ========================
-# Root-level temporary logs (cleaned up, but just in case)
+# Root-level temporary logs
 # ========================
-stata_batch__*.log
 doctor_test.log
 
 # ========================
 # MCP working directories (machine-local)
 # ========================
-.statamcp/
 .playwright-mcp/
 
 # ========================

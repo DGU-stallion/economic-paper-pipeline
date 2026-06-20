@@ -217,7 +217,7 @@ class ConversationMemory:
             "topic": "选题研究",
             "literature": "文献综述",
             "data": "数据获取与清洗",
-            "stata": "Stata实证回归",
+            "analyze": "实证回归分析",
             "robustness": "稳健性检验",
             "conclusion": "验证结论",
             "paper": "LaTeX论文撰写"

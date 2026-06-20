@@ -2,7 +2,7 @@
 """数据助手核心逻辑
 
 原始数据诊断 → 清洗方案 → Python pandas 清洗 → 数据验证。
-Python 后端优先；Stata do-file 保留为旧版兼容 (docstring 标记 [旧版兼容])。
+Python 后端优先。
 """
 
 from __future__ import annotations
@@ -77,13 +77,6 @@ def commit_clean_plan(plan: str, project_dir: Path) -> str:
     plan_path = project_dir / "data" / "01_clean_plan.md"
     plan_path.write_text(content, encoding="utf-8")
     return str(plan_path)
-
-
-def commit_clean_script(do_content: str, project_dir: Path) -> str:
-    """[旧版兼容] 写入 Stata 清洗 do-file（Python 后端使用 run_clean_python）"""
-    script_path = project_dir / "data" / "scripts" / "01_clean.do"
-    script_path.write_text(do_content, encoding="utf-8")
-    return str(script_path)
 
 
 def commit_validation(

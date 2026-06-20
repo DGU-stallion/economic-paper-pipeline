@@ -410,7 +410,7 @@ def compile_panel_data(figshare_df):
 # 6. 保存与报告
 # ============================================================
 def save_panel_data(panel):
-    """保存面板数据为 CSV 和 Stata 格式"""
+    """保存面板数据为 CSV 和 .dta 格式"""
     print("\n" + "=" * 70)
     print("保存面板数据...")
     print("=" * 70)

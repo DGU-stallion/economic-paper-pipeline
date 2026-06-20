@@ -27,8 +27,7 @@
 
 ```
 1. Python (statsmodels/linearmodels) — 首选，无需外部工具
-2. Stata (通过 stata-mcp MCP) — 若 Stata + MCP 可用
-3. LLM-only — 无运行时，纯对话引导 + 模板生成
+2. LLM-only — 无运行时，纯对话引导 + 模板生成
 ```
 
 检测方法：`scripts/backends/__init__.py` → `detect()` 返回能力字典。
@@ -51,10 +50,29 @@ papers/<project>/
 ### 行为准则
 
 1. 只说自然语言，不暴露命令细节
-2. 先检测能力范围（Stata/Python/TexLive），不可用功能友好提示
+2. 先检测能力范围（Python/TexLive），不可用功能友好提示
 3. 模块间通过 context_store 传递变量（Y/D/X/识别策略等）
 4. 每步结果一句话总结，不甩日志
 5. 需要参数时一句话追问
+
+### 🚨 能力完成契约（所有能力通用）
+
+能力完成后，必须在回复中同时包含以下 3 项，缺一不可：
+
+```
+📄 产出物: <文件路径1>, <文件路径2>, ...
+➡️ 下一步: 
+   1. <推荐任务A> — <理由>
+   2. <推荐任务B> — <理由>
+   3. <推荐任务C> — <理由>
+❓ 或自定义: 你还有其他想法吗？
+```
+
+- **产出物路径是必需项**：输出文件（.md/.tex/.bib/.json 等）列出绝对路径；context_store 变量列出 key:value
+- **下一步推荐 2-3 个**，按优先级排列，附简短理由
+- **最后必须给用户开放选择权**：不能只推一个选项
+
+> 这条规则覆盖 8 项能力。能力详解中不再重复。
 
 ---
 
@@ -70,12 +88,17 @@ What → Why → Who → When → Where → How
 
 ### 2. Research — 搜索文献 + 数据源
 
-依赖 web-access (CDP / WebSearch)。不可用时降级为 WebSearch-only。
+自动检测搜索后端（优先级）：Tavily → paper-search-mcp → WebSearch/WebFetch。
 并行两条线：
 - 文献搜索 → 候选论文列表（标题/作者/摘要/链接）
 - 数据源搜索 → 可用数据集（覆盖变量/获取途径/时间范围）
 
-产出: `candidate_papers`, `data_sources`, `feasibility_verdict`
+产出: `candidate_papers`, `data_sources`, `feasibility_verdict`, `search_backend_used`
+
+写入路径（有项目结构时）:
+- 候选论文 → `papers/<project>/literature/00_candidate_papers.md`
+- 数据源报告 → `papers/<project>/data/00_feasibility_report.md`
+- context_store: `candidate_papers`, `data_sources`, `feasibility_verdict`, `search_backend_used`
 
 ### 3. Literature — 筛选 + 综述 + .bib
 
@@ -86,22 +109,21 @@ What → Why → Who → When → Where → How
 
 ### 4. Data — 诊断 + 清洗 + 验证
 
-诊断原始数据（缺失/异常/类型）→ 清洗方案 → 执行 → 验证。
-Python 后端用 `scripts/backends/`（pandas/linearmodels）；Stata 后端生成 .do 文件（旧版兼容）。
+诊断原始数据（缺失/异常/类型）→ 清洗方案 → Python pandas 执行 → 验证。
 
 产出: `clean_data_path`, `data_quality_report`
 
 ### 5. Analyze — 回归 + 异质性 + 中介
 
 根据 identification 设定模型 → 基准回归 → 异质性分析 → 中介效应。
-Python 后端自动输出 .tex 表格；Stata 后端输出 `esttab` .tex（旧版兼容）。
+Python 后端 (linearmodels) 自动输出 .tex 表格。
 
 产出: `baseline`, `heterogeneity`, `mediation` (dicts 或 tex 路径)
 
 ### 6. Verify — 稳健性检验套件
 
 替换变量测度 / 改变样本窗口 / 安慰剂检验 / 替换聚类层级 / 排除极端值。
-后端自动选择（Python 或 Stata）。
+Python 后端自动执行。
 
 产出: `robustness_results` (汇总 + 结论)
 
@@ -147,8 +169,7 @@ pdf_path (str)                — 编译的 .pdf 路径
 
 | 检测项 | 可用 | 降级行为 |
 |--------|------|---------|
-| Python statsmodels | YES | 默认后端，生成 markdown 表格 + .tex |
-| Stata (stata-mcp) | YES | 生成 .do 文件 + stata-mcp 执行 |
+| Python statsmodels/linearmodels | YES | 默认后端，生成 markdown 表格 + .tex |
 | Python + statsmodels | NO | 纯 LLM 生成回归结果模板（无法跑真实数据） |
 | TeX Live (xelatex) | NO | 提示用户本地编译或上传 Overleaf |
 | web-access | NO | Research 能力降为手动搜索指导 |

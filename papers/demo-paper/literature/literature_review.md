@@ -83,9 +83,9 @@
 
 **Journal of Econometrics 1999**. 面板门槛回归的奠基文献。提出固定效应面板的门槛估计和推断方法，通过 Bootstrap 检验门槛效应显著性。本文门槛模型的技术参考。
 
-### D2. 门槛面板 Stata 实现
+### D2. 门槛面板模型实现
 
-使用 `xthreg` 命令（Wang, 2015）实现 Hansen 门槛模型，支持单门槛、双门槛、三门槛依次检验。
+基于 Hansen (1999) 网格搜索法，Python linearmodels PanelOLS 分样本回归实现门槛效应检验。
 
 ---
 

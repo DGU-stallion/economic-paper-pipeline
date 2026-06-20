@@ -2,7 +2,7 @@
 """
 Python analysis backend.
 
-Runs panel regressions via linearmodels, generates LaTeX tables.
+Runs panel regressions via linearmodels or pyfixest, generates LaTeX tables.
 Zero Stata dependency. Works on any OS with Python.
 """
 
@@ -15,6 +15,14 @@ import pandas as pd
 import numpy as np
 from linearmodels.panel import PanelOLS
 from linearmodels.panel.results import PanelResults
+
+# ── Optional pyfixest backend (faster for large panels) ──
+HAS_PYFIXEST = False
+try:
+    import pyfixest as pf
+    HAS_PYFIXEST = True
+except ImportError:
+    pass
 
 
 # ── Public API ──
@@ -29,60 +37,38 @@ def run_panel_ols(
     fe_time: str = "year",
     cluster_entity: str = "id",
     project_dir: Optional[Path] = None,
+    backend: str = "auto",
 ) -> dict:
-    """Run PanelOLS with entity+time FE, clustered SE.
+    """Run panel FE regression with clustered SE.
 
-    Supports two models:
-      M1: y ~ D (baseline)
-      M2: y ~ D + controls
+    Supports two backends:
+      - "linearmodels": PanelOLS (default, always available)
+      - "pyfixest": feols (faster for large panels, pip install pyfixest)
+      - "auto": try pyfixest if N*T > 10000, fallback linearmodels
 
-    Returns structured results dict + writes .tex table.
-
-    Args:
-        data_path: Path to CSV/Parquet/Stata file.
-        y_var: Dependent variable name.
-        d_var: Core explanatory variable.
-        controls: Control variable names.
-        fe_entity: Entity FE column name.
-        fe_time: Time FE column name.
-        cluster_entity: Cluster SE column name.
-        project_dir: If set, write table file to analysis/output/.
-
-    Returns:
-        dict with keys: variables, r_squared, n, caption, tex_path, models.
+    Returns dict with keys: variables, r_squared, n, caption, tex_path, models, backend_used.
     """
     df = _load_data(data_path)
     _validate_columns(df, [y_var, d_var, fe_entity, fe_time, cluster_entity]
                       + (controls or []))
-
-    # Set panel index (dropna first to avoid index-column conflict)
     df = df.dropna(subset=[y_var, d_var]).set_index([fe_entity, fe_time])
 
-    # De-meaning formula (EntityEffects + TimeEffects for FE)
-    base_formula = f"{y_var} ~ 1 + {d_var} + EntityEffects + TimeEffects"
-    full_formula = base_formula
-    if controls:
-        full_formula = f"{y_var} ~ 1 + {d_var} + " + " + ".join(controls) + " + EntityEffects + TimeEffects"
+    # Select backend
+    use_pyfixest = False
+    if backend == "pyfixest" and HAS_PYFIXEST:
+        use_pyfixest = True
+    elif backend == "auto" and HAS_PYFIXEST and len(df) > 10000:
+        use_pyfixest = True
 
-    # M1: baseline
-    m1 = PanelOLS.from_formula(
-        base_formula, df,
-        drop_absorbed=True,
-    ).fit(cov_type='clustered', cluster_entity=cluster_entity)
+    if use_pyfixest:
+        m1, m2 = _run_panel_ols_pyfixest(df, y_var, d_var, controls, fe_entity, fe_time, cluster_entity)
+        backend_used = "pyfixest"
+    else:
+        m1, m2 = _run_panel_ols_linearmodels(df, y_var, d_var, controls, fe_entity, fe_time, cluster_entity)
+        backend_used = "linearmodels"
 
-    # M2: with controls
-    m2 = None
-    if controls:
-        m2 = PanelOLS.from_formula(
-            full_formula, df,
-            drop_absorbed=True,
-        ).fit(cov_type='clustered', cluster_entity=cluster_entity)
-
-    # Build structured results
     variables = _extract_vars(m1, m2, d_var, controls)
-    models = {
-        "m1": _model_to_dict(m1),
-    }
+    models = {"m1": _model_to_dict(m1)}
     if m2 is not None:
         models["m2"] = _model_to_dict(m2)
 
@@ -92,9 +78,9 @@ def run_panel_ols(
         "n": int(m1.nobs),
         "caption": "基准回归结果",
         "models": models,
+        "backend_used": backend_used,
     }
 
-    # Write .tex
     if project_dir:
         tex = _generate_baseline_tex(result)
         tex_path = project_dir / "analysis" / "output" / "02_baseline_regression.tex"
@@ -103,6 +89,102 @@ def run_panel_ols(
         result["tex_path"] = str(tex_path)
 
     return result
+
+
+# ── Backend wrappers ──
+
+
+def _run_panel_ols_linearmodels(df, y_var, d_var, controls, fe_entity, fe_time, cluster_entity):
+    """Run PanelOLS via linearmodels (default)."""
+    base_formula = f"{y_var} ~ 1 + {d_var} + EntityEffects + TimeEffects"
+    full_formula = base_formula
+    if controls:
+        full_formula = f"{y_var} ~ 1 + {d_var} + " + " + ".join(controls) + " + EntityEffects + TimeEffects"
+
+    m1 = PanelOLS.from_formula(base_formula, df, drop_absorbed=True).fit(
+        cov_type='clustered', cluster_entity=cluster_entity)
+    m2 = PanelOLS.from_formula(full_formula, df, drop_absorbed=True).fit(
+        cov_type='clustered', cluster_entity=cluster_entity) if controls else None
+    return m1, m2
+
+
+def _run_panel_ols_pyfixest(df, y_var, d_var, controls, fe_entity, fe_time, cluster_entity):
+    """Run fixed effects via pyfixest (faster for large panels)."""
+    base_fml = f"{y_var} ~ {d_var} | {fe_entity} + {fe_time}"
+    full_fml = base_fml
+    if controls:
+        full_fml = f"{y_var} ~ {d_var} + " + " + ".join(controls) + f" | {fe_entity} + {fe_time}"
+
+    m1 = pf.feols(base_fml, data=df.reset_index(), vcov={"CRV1": cluster_entity})
+    m2 = pf.feols(full_fml, data=df.reset_index(), vcov={"CRV1": cluster_entity}) if controls else None
+    return m1, m2
+
+
+# ── DID ──
+
+
+def run_did(
+    data_path: Path,
+    y_var: str,
+    treat_var: str,
+    post_var: str,
+    controls: Optional[List[str]] = None,
+    fe_entity: str = "id",
+    fe_time: str = "year",
+    cluster_entity: str = "id",
+    project_dir: Optional[Path] = None,
+) -> dict:
+    """Run DID (interaction of treat×post) using PanelOLS.
+
+    Formula: y ~ 1 + treat:post + treat + post + controls
+    Entity FE + Time FE + clustered SE.
+
+    Returns structured results dict.
+    """
+    df = _load_data(data_path)
+    _validate_columns(df, [y_var, treat_var, post_var, fe_entity, fe_time, cluster_entity]
+                      + (controls or []))
+
+    df = df.dropna(subset=[y_var, treat_var, post_var])
+
+    # Create interaction term before set_index (post_var may be fe_time)
+    df["_did_interact"] = df[treat_var] * df[post_var]
+    df = df.set_index([fe_entity, fe_time])
+
+    # DID formula: interaction is identified; treat/post absorbed by FEs
+    formula = f"{y_var} ~ 1 + _did_interact + EntityEffects + TimeEffects"
+    if controls:
+        formula = f"{y_var} ~ 1 + _did_interact + " + " + ".join(controls) + " + EntityEffects + TimeEffects"
+
+    mod = PanelOLS.from_formula(
+        formula, df,
+        drop_absorbed=True,
+    ).fit(cov_type='clustered', cluster_entity=cluster_entity)
+
+    coef = float(mod.params.get("_did_interact", 0))
+    se = float(mod.std_errors.get("_did_interact", 0))
+    pval = float(mod.pvalues.get("_did_interact", 1))
+
+    result = {
+        "did_coef": f"{coef:.4f}",
+        "did_se": f"{se:.4f}",
+        "did_sig": _sig_stars(pval),
+        "did_pval": pval,
+        "r_squared": round(float(mod.rsquared), 4),
+        "n": int(mod.nobs),
+    }
+
+    if project_dir:
+        tex = _generate_did_tex(result)
+        tex_path = project_dir / "analysis" / "output" / "02_did.tex"
+        tex_path.parent.mkdir(parents=True, exist_ok=True)
+        tex_path.write_text(tex, encoding="utf-8")
+        result["tex_path"] = str(tex_path)
+
+    return result
+
+
+# ── Heterogeneity ──
 
 
 def run_heterogeneity(
@@ -179,67 +261,6 @@ def run_heterogeneity(
     return result
 
 
-def run_did(
-    data_path: Path,
-    y_var: str,
-    treat_var: str,
-    post_var: str,
-    controls: Optional[List[str]] = None,
-    fe_entity: str = "id",
-    fe_time: str = "year",
-    cluster_entity: str = "id",
-    project_dir: Optional[Path] = None,
-) -> dict:
-    """Run DID (interaction of treat×post) using PanelOLS.
-
-    Formula: y ~ 1 + treat:post + treat + post + controls
-    Entity FE + Time FE + clustered SE.
-
-    Returns structured results dict.
-    """
-    df = _load_data(data_path)
-    _validate_columns(df, [y_var, treat_var, post_var, fe_entity, fe_time, cluster_entity]
-                      + (controls or []))
-
-    df = df.dropna(subset=[y_var, treat_var, post_var])
-
-    # Create interaction term before set_index (post_var may be fe_time)
-    df["_did_interact"] = df[treat_var] * df[post_var]
-    df = df.set_index([fe_entity, fe_time])
-
-    # DID formula: interaction is identified; treat/post absorbed by FEs
-    formula = f"{y_var} ~ 1 + _did_interact + EntityEffects + TimeEffects"
-    if controls:
-        formula = f"{y_var} ~ 1 + _did_interact + " + " + ".join(controls) + " + EntityEffects + TimeEffects"
-
-    mod = PanelOLS.from_formula(
-        formula, df,
-        drop_absorbed=True,
-    ).fit(cov_type='clustered', cluster_entity=cluster_entity)
-
-    coef = float(mod.params.get("_did_interact", 0))
-    se = float(mod.std_errors.get("_did_interact", 0))
-    pval = float(mod.pvalues.get("_did_interact", 1))
-
-    result = {
-        "did_coef": f"{coef:.4f}",
-        "did_se": f"{se:.4f}",
-        "did_sig": _sig_stars(pval),
-        "did_pval": pval,
-        "r_squared": round(float(mod.rsquared), 4),
-        "n": int(mod.nobs),
-    }
-
-    if project_dir:
-        tex = _generate_did_tex(result)
-        tex_path = project_dir / "analysis" / "output" / "02_did.tex"
-        tex_path.parent.mkdir(parents=True, exist_ok=True)
-        tex_path.write_text(tex, encoding="utf-8")
-        result["tex_path"] = str(tex_path)
-
-    return result
-
-
 # ── Internal helpers ──
 
 
@@ -271,11 +292,7 @@ def _extract_vars(
     d_var: str,
     controls: Optional[List[str]],
 ) -> List[dict]:
-    """Build variable rows for side-by-side model LaTeX table.
-
-    Each entry has keys: name, m1 (dict or None), m2 (dict or None).
-    Per-model dict: {coef, se, sig}.
-    """
+    """Build variable rows for side-by-side model LaTeX table."""
     variables = []
     all_names = [d_var] + (controls or [])
 
@@ -313,14 +330,14 @@ def _sig_stars(pval: float) -> str:
         return "*"
     return ""
 
+
 def _tex_sig(sig: str) -> str:
-    """Wrap significance stars in \\sym{}. Returns empty string if no sig."""
     return f"\\sym{{{sig}}}" if sig else ""
 
 
 def _tex_name(name: str) -> str:
-    """Sanitize variable names for LaTeX (escape underscores)."""
     return name.replace("_", "\\_")
+
 
 def _generate_baseline_tex(result: dict) -> str:
     """Generate publication-quality baseline table with model stats."""
@@ -347,7 +364,6 @@ def _generate_baseline_tex(result: dict) -> str:
         if any(ses):
             rows.append("  & " + " & ".join(ses) + " \\\\")
 
-    # Model statistics rows
     rows.append(r"\midrule")
     r2_parts = ["R²"]
     n_parts = ["样本量"]
@@ -358,13 +374,12 @@ def _generate_baseline_tex(result: dict) -> str:
     rows.append(" & ".join(r2_parts) + " \\\\")
     rows.append(" & ".join(n_parts) + " \\\\")
 
-    # Footnotes (build raw strings to avoid f-string escaping headache)
     ncols = n_models + 1
     fn1 = r"\multicolumn{" + str(ncols) + r"}{l}{\footnotesize 括号内为聚类稳健标准误（省份层面）。}\\"
     fn2 = r"\multicolumn{" + str(ncols) + r"}{l}{\footnotesize * $p<0.10$, ** $p<0.05$, *** $p<0.01$}\\"
 
     return (
-        "% 基准回归结果 (Python PanelOLS, " + now + ")\n"
+        "% 基准回归结果 (Python, " + now + ")\n"
         + r"\begin{table}[htbp]" + "\n"
         + r"\centering" + "\n"
         + r"\caption{" + result.get("caption", "基准回归结果") + "}" + "\n"
@@ -391,7 +406,6 @@ def _generate_heterogeneity_tex(result: dict) -> str:
     col_spec = "l" + "c" * n_groups if n_groups > 0 else "lc"
 
     if n_groups <= 1:
-        # Simple single-column layout
         rows = []
         for g in groups:
             name = g.get("name", "")
@@ -403,7 +417,7 @@ def _generate_heterogeneity_tex(result: dict) -> str:
             if se:
                 rows.append(f"  & ({se}) & \\\\")
         return (
-            "% 异质性分析 (Python PanelOLS, " + now + ")\n"
+            "% 异质性分析 (Python, " + now + ")\n"
             + r"\begin{table}[htbp]" + "\n"
             + r"\centering" + "\n"
             + r"\caption{" + result.get("caption", "异质性分析") + "}" + "\n"
@@ -421,13 +435,11 @@ def _generate_heterogeneity_tex(result: dict) -> str:
             + r"\end{table}"
         )
 
-    # Side-by-side: each group gets a column
     header_parts = [""]
     for g in groups:
         header_parts.append(f"\\multicolumn{{1}}{{c}}{{{g['name']}}}")
     col_header = " & ".join(header_parts)
 
-    # Coefficient row
     coef_parts = [_tex_name(result.get('coef_label', '系数'))]
     se_parts = ["标准误"]
     n_parts = ["样本量"]
@@ -444,7 +456,7 @@ def _generate_heterogeneity_tex(result: dict) -> str:
     fn1 = r"\multicolumn{" + str(n_groups + 1) + r"}{l}{\footnotesize 括号内为聚类稳健标准误。}\\"
     fn2 = r"\multicolumn{" + str(n_groups + 1) + r"}{l}{\footnotesize * $p<0.10$, ** $p<0.05$, *** $p<0.01$}\\"
     return (
-        "% 异质性分析 (Python PanelOLS, " + now + ")\n"
+        "% 异质性分析 (Python, " + now + ")\n"
         + r"\begin{table}[htbp]" + "\n"
         + r"\centering" + "\n"
         + r"\caption{" + result.get("caption", "异质性分析") + "}" + "\n"
@@ -467,7 +479,7 @@ def _generate_did_tex(result: dict) -> str:
     """Generate LaTeX table from DID results."""
     now = datetime.now().isoformat(timespec="minutes")
     return f"""\
-% DID 双重差分结果 (Python PanelOLS, {now})
+% DID 双重差分结果 (Python, {now})
 \\begin{{table}}[htbp]
 \\centering
 \\caption{{双重差分 (DID) 结果}}
