@@ -1,6 +1,26 @@
-# 经济学实证论文工作流 — AI Skill
+# 论文助手 — Paper Assistant for Coding Agents
 
-> 可移植 AI 技能（Skill），覆盖经济学实证论文完整流程：选题、文献综述、数据清洗、回归分析、稳健性检验、LaTeX 论文撰写。纯自然语言交互，不绑定特定 AI 工具。
+> 面向经济学与社会科学实证研究、运行于 Claude Code、Codex、Kiro、Cursor、OpenCode 等 Coding Agent 的主动式研究协作 Skill。
+
+论文助手会读取项目中的研究问题、文献、数据、实证结果和论文草稿，判断当前完成度、阻塞项与风险，并协助推进选题灵感、方向验证、文献搜索、数据搜集、实证分析和论文写作。
+
+## 一句话安装
+
+将下面这段话完整复制给你的 Coding Agent：
+
+```text
+请为我安装并初始化“论文助手”：https://github.com/DGU-stallion/economic-paper-pipeline
+
+请先读取仓库中的 AGENT_INSTALL.md，检测我的操作系统、Agent 类型和现有环境；安装或更新论文助手及 Standard 实证分析环境；检测可用的搜索、MCP 和 LaTeX 能力；最后运行 Doctor 和安装测试，并向我报告已启用能力、未启用能力及原因。未经我确认，不要安装大型系统软件，不要修改全局配置，不要上传我的论文、数据或密钥，也不要让我手动执行你能够安全完成的命令。
+```
+
+Agent 安装完成后，你可以直接说：
+
+```text
+检查我当前的论文状态，告诉我最应该推进的三件事。
+```
+
+详细安装安全边界和验证步骤见 [`AGENT_INSTALL.md`](AGENT_INSTALL.md)。
 
 [![Version](https://img.shields.io/badge/version-4.2.0-blue)](https://github.com/DGU-stallion/economic-paper-pipeline)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
