@@ -205,6 +205,14 @@ def cmd_states(args=None):
         print(f"  {name:15s} | {states}")
 
 
+def cmd_doctor(args=None):
+    """运行无依赖环境诊断。"""
+    from install.bootstrap import main as doctor_main
+
+    doctor_args = args[2:] if args else []
+    raise SystemExit(doctor_main(doctor_args))
+
+
 _COMMANDS = {
     "list": cmd_list,
     "new": cmd_new,
@@ -218,6 +226,7 @@ _COMMANDS = {
     "graph": cmd_graph,
     "states": cmd_states,
     "cleanup": cmd_cleanup,
+    "doctor": cmd_doctor,
     "help": lambda _: print("可用命令: " + ", ".join(sorted(_COMMANDS.keys()))),
 }
 

@@ -147,12 +147,12 @@ def print_human(report: dict[str, Any]) -> None:
             print(f"- {recommendation}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="论文助手无依赖环境诊断")
     parser.add_argument("--check", action="store_true", help="只检测环境，不安装或修改系统")
     parser.add_argument("--profile", choices=("lite", "standard", "full"), default="standard")
     parser.add_argument("--json", action="store_true", help="输出稳定 JSON 报告")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     report = build_report(args.profile)
     if args.json:

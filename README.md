@@ -22,10 +22,10 @@ Agent 安装完成后，你可以直接说：
 
 详细安装安全边界和验证步骤见 [`AGENT_INSTALL.md`](AGENT_INSTALL.md)。
 
-[![Version](https://img.shields.io/badge/version-4.2.0-blue)](https://github.com/DGU-stallion/economic-paper-pipeline)
+[![Version](https://img.shields.io/badge/version-5.0.0a1-blue)](https://github.com/DGU-stallion/economic-paper-pipeline)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Skill](https://img.shields.io/badge/AI%20Skill-portable-orange)](CLAUDE.md)
-[![Python](https://img.shields.io/badge/Python-3.12%2B-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
 [![PanelOLS](https://img.shields.io/badge/linearmodels-7.0%2B-purple)](https://bashtage.github.io/linearmodels/)
 
 ---
@@ -150,25 +150,17 @@ cd economic-paper-pipeline
 "帮我创建一篇关于数字经济与就业结构的研究"
 ```
 
-### 方式二：带 Python 后端（推荐，有回归能力）
+### 方式二：Standard 实证分析环境
+
+Agent 会按 [`AGENT_INSTALL.md`](AGENT_INSTALL.md) 在隔离的 `.venv` 中安装锁定依赖。高级用户也可手动执行：
 
 ```bash
-pip install pandas numpy statsmodels linearmodels openpyxl
-
-# 验证后端就绪
-python3 -c "
-from scripts.backends import detect
-caps = detect()
-print('Python 分析后端可用' if caps['python_analysis'] else '需安装 linearmodels')
-"
+python3 -m venv .venv
+.venv/bin/python -m pip install -r install/requirements-standard.txt
+.venv/bin/python install/bootstrap.py --check --profile standard
 ```
 
-有 Python 后端时：
-- 面板回归自动执行，结果输出 .tex 表格
-- 数据清洗自动运行
-- 门槛回归、稳健性检验全部自动化
-
-无 Python 后端时自动降级为 LLM-only，仍然可以使用全部 8 项能力，回归结果以模板形式呈现。
+Standard 就绪后可执行真实数据清洗、面板回归、DID 和稳健性分析。Doctor 会区分真实后端、宿主 Agent 能力和不可用项；没有分析后端时，任何模板结果都不得标记为已执行。
 
 ### 方式三：CLI 直接调用
 

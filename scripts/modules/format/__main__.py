@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """格式助手 — 独立运行入口"""
 import argparse
+import json
 from scripts.shared.paths import PAPERS_DIR
 from scripts.modules.format.core import run, compile_tex, detect_texlive
 

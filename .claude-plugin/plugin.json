@@ -1,7 +1,7 @@
 {
   "name": "economic-paper-pipeline",
-  "version": "2.1.0",
-  "description": "经济学实证论文工作流 — 纯对话式 AI 协作，覆盖选题、文献综述、实证分析、稳健性检验、LaTeX 论文撰写全流程",
+  "version": "5.0.0-alpha.1",
+  "description": "论文助手 — 运行于 Coding Agent 的主动式实证研究协作 Skill，覆盖选题、文献、数据、实证与写作",
   "author": {
     "name": "DGU-stallion"
   },

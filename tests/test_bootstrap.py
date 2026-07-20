@@ -44,6 +44,18 @@ class BootstrapContractTests(unittest.TestCase):
         self.assertEqual(report["profile"], "lite")
         self.assertTrue(report["capabilities"]["python"]["available"])
 
+    def test_pipeline_exposes_doctor_json(self):
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "pipeline.py"), "doctor", "--json"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["schema_version"], "1")
+
     def test_agent_install_contract_exists(self):
         contract = ROOT / "AGENT_INSTALL.md"
         self.assertTrue(contract.is_file())
