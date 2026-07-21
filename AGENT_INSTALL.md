@@ -15,7 +15,7 @@
 
 ### 1. 获取仓库
 
-如果当前目录不是PaperPilot仓库，克隆：
+如果当前目录不是 PaperPilot 仓库，克隆：
 
 ```bash
 git clone https://github.com/DGU-stallion/economic-paper-pipeline.git
@@ -52,23 +52,80 @@ py -m venv .venv
 .venv\Scripts\python -m pip install -r install\requirements-standard.txt
 ```
 
-Lite 档位可以跳过第三方分析依赖。Full 档位中的 TeX Live、R、Stata 和额外 MCP 必须单独征得用户同意。
-
 ### 4. 重新诊断
-
-使用虚拟环境中的 Python 再次运行：
 
 ```bash
 .venv/bin/python install/bootstrap.py --check --profile standard --json
 ```
 
-Windows 使用 `.venv\Scripts\python`。
+### 5. 搜索能力检测与配置
 
-### 5. 加载 Skill
+安装完成后，检测以下搜索能力：
 
-把仓库根目录作为PaperPilot工作目录，读取 `CLAUDE.md` 了解当前能力契约。不同 Agent 的专属薄适配器将在 `adapters/` 中提供；缺少专属适配器时，使用仓库文档和 Python CLI，不要猜测不存在的命令。
+#### paper-search-mcp（学术文献检索 — 推荐安装）
 
-### 6. 验证和报告
+用途：精确搜索学术论文、追踪引用链、批量获取论文元数据、下载 PDF。覆盖 arXiv、Semantic Scholar、PubMed、Crossref、OpenAlex、SSRN 等 20+ 学术源。
+
+检测方式：
+
+```bash
+pip show paper-search-mcp 2>/dev/null && echo "已安装" || echo "未安装"
+```
+
+安装方式（如未安装，向用户说明用途后推荐安装）：
+
+```bash
+pip install paper-search-mcp
+```
+
+MCP 配置（根据用户的 Agent 平台选择对应格式）：
+
+Kiro（`.kiro/settings/mcp.json`）：
+```json
+{
+  "mcpServers": {
+    "paper-search": {
+      "command": "python",
+      "args": ["-m", "paper_search_mcp.server"],
+      "env": {
+        "SCHOLAR_SEARCH_ENABLE_SEMANTIC_SCHOLAR": "true",
+        "SCHOLAR_SEARCH_ENABLE_ARXIV": "true"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+Claude Code：
+```bash
+claude mcp add paper-search -- python -m paper_search_mcp.server
+```
+
+所有 API Key 均为可选。无 Key 即可使用基础功能，有 Key 可提升速率限制。
+
+#### web-access（信息侦察与网页访问）
+
+检测 web-access skill 是否已安装。该 skill 提供 WebSearch、WebFetch 和浏览器 CDP 能力，用于选题验证、数据源定位等非学术文献类搜索。
+
+如未安装，告知用户：
+
+> "web-access skill 未检测到。选题阶段的信息侦察和数据源探索将依赖 Agent 平台内置搜索能力，精度可能有限。"
+
+#### 能力降级说明
+
+| 缺少 | 影响 | 替代方案 |
+|------|------|---------|
+| paper-search-mcp | 学术文献搜索降为通用搜索 | 通过 web-access 访问 Google Scholar / Semantic Scholar 网页版 |
+| web-access | 信息侦察精度降低 | 使用 Agent 平台内置 web search / web fetch |
+| 两者都无 | 搜索能力严重受限 | 需要用户手动提供文献列表和数据源 |
+
+### 6. 加载 Skill
+
+读取 `CLAUDE.md` 了解行为契约。不同 Agent 的适配器在 `adapters/` 中提供。
+
+### 7. 验证和报告
 
 至少运行：
 
@@ -76,14 +133,26 @@ Windows 使用 `.venv\Scripts\python`。
 .venv/bin/python -m unittest tests/test_bootstrap.py -v
 ```
 
+### 8. 报告并引导下一步
+
 向用户报告：
 
-- 安装档位和仓库路径；
-- 已启用能力；
-- 未启用能力及影响；
-- 是否使用宿主 Agent 搜索；
-- 是否配置了外部 MCP/API；
-- 测试结果；
-- 推荐的第一步：运行 Demo、创建新论文或导入已有论文。
+- 安装档位和仓库路径
+- 已启用能力（含搜索能力）
+- 未启用能力及影响
+- 测试结果
 
-不要把“脚本运行成功”表述为“全部研究能力可用”；以 Doctor 的能力矩阵为准。
+**然后引导用户选择下一步**（不要假设用户已有论文项目）：
+
+```
+PaperPilot 安装完成。你想：
+
+1. 开始一篇新论文 — 我会先了解你的背景和研究想法
+2. 导入已有论文项目 — 告诉我项目路径，我来诊断状态
+3. 看一下 Demo — 了解完整流程是什么样的
+```
+
+只有用户选择 2（导入已有项目）时，才执行 `pp inspect`。
+选择 1 时，进入 paper-agent 的 onboarding 对话流程。
+
+不要把"脚本运行成功"表述为"全部研究能力可用"；以 Doctor 的能力矩阵为准。
