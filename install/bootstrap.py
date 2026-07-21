@@ -148,6 +148,14 @@ def print_human(report: dict[str, Any]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    import sys
+    # Ensure stdout can handle UTF-8 (fixes Windows cp1252 crash)
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(description="论文助手无依赖环境诊断")
     parser.add_argument("--check", action="store_true", help="只检测环境，不安装或修改系统")
     parser.add_argument("--profile", choices=("lite", "standard", "full"), default="standard")
