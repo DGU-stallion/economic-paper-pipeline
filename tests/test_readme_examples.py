@@ -71,7 +71,7 @@ class ReadmeCliExamplesTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_help_command(self):
-        """README: epp help — lists available commands"""
+        """README: pp help — lists available commands"""
         result = self._run("help")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("可用命令", result.stdout)
@@ -93,14 +93,14 @@ class ReadmeCliExamplesTests(unittest.TestCase):
         self.assertIn("capabilities", report)
 
     def test_inspect_json(self):
-        """README equivalent: epp inspect <dir> --json"""
+        """README equivalent: pp inspect <dir> --json"""
         result = self._run("inspect", self.tmp, "--json")
         self.assertEqual(result.returncode, 0, result.stderr)
         report = json.loads(result.stdout)
         self.assertEqual(report["schema_version"], "1")
 
     def test_workflow_subcommand_exists(self):
-        """epp workflow shows usage (not an error)"""
+        """pp workflow shows usage (not an error)"""
         result = self._run("workflow")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("plan", result.stdout)
@@ -112,7 +112,7 @@ class VersionSingleSourceTests(unittest.TestCase):
     def test_version_source_is_scripts_init(self):
         """pyproject.toml reads version from scripts.__version__"""
         from scripts import __version__
-        self.assertTrue(__version__.startswith("5."))
+        self.assertTrue(__version__.startswith("6."))
 
     def test_pyproject_references_dynamic_version(self):
         """pyproject.toml uses dynamic = ["version"] sourced from scripts.__init__"""

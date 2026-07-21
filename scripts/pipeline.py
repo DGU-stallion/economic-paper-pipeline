@@ -227,7 +227,7 @@ def cmd_workflow(args=None):
 
     sub = args[2] if args and len(args) > 2 else ""
     if not sub:
-        print("用法: epp workflow <plan|commit|verify|recover|revisions> [参数]")
+        print("用法: pp workflow <plan|commit|verify|recover|revisions> [参数]")
         return
 
     project_name = get_current_project()
@@ -239,20 +239,20 @@ def cmd_workflow(args=None):
         module = args[3] if len(args) > 3 else ""
         desc = args[4] if len(args) > 4 else ""
         if not module:
-            print("用法: epp workflow plan <模块名> [描述]")
+            print("用法: pp workflow plan <模块名> [描述]")
             sys.exit(1)
         result = wf.plan(project_name, module, desc)
     elif sub == "commit":
         module = args[3] if len(args) > 3 else ""
         if not module:
-            print("用法: epp workflow commit <模块名>")
+            print("用法: pp workflow commit <模块名>")
             sys.exit(1)
         # Read result JSON from stdin or pass empty
         result = wf.commit_result(project_name, module, result={})
     elif sub == "verify":
         module = args[3] if len(args) > 3 else ""
         if not module:
-            print("用法: epp workflow verify <模块名>")
+            print("用法: pp workflow verify <模块名>")
             sys.exit(1)
         result = wf.verify(project_name, module, checks_passed=True)
     elif sub == "recover":
@@ -267,7 +267,7 @@ def cmd_workflow(args=None):
             print(f"  {rev['revision_id']}  {rev['label']}  ({rev['timestamp']})")
         return
     else:
-        print("用法: epp workflow <plan|commit|verify|recover|revisions> [参数]")
+        print("用法: pp workflow <plan|commit|verify|recover|revisions> [参数]")
         return
 
     print(json.dumps(result, ensure_ascii=False, indent=2))
@@ -291,7 +291,7 @@ _COMMANDS = {
     "doctor": cmd_doctor,
     "inspect": cmd_inspect,
     "workflow": cmd_workflow,
-    "help": lambda _: print("可用命令: " + ", ".join(sorted(_COMMANDS.keys()))),
+    "help": lambda _: print("可用命令: " + ", ".join(sorted(_COMMANDS.keys())) + "\n\nCLI: pp <command>"),
 }
 
 

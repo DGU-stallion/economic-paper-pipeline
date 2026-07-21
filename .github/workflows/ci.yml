@@ -41,7 +41,7 @@ jobs:
       - name: Run full test suite
         run: python -m pytest tests/ -v --tb=short
 
-      - name: Verify epp CLI entry point
+      - name: Verify pp CLI entry point
         run: |
           python scripts/pipeline.py help
           python scripts/pipeline.py inspect . --json

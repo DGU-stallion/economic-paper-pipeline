@@ -1,7 +1,7 @@
 {
-  "name": "economic-paper-pipeline",
-  "version": "5.0.0-alpha.1",
-  "description": "论文助手 — 运行于 Coding Agent 的主动式实证研究协作 Skill，覆盖选题、文献、数据、实证与写作",
+  "name": "paperpilot",
+  "version": "6.0.0-alpha.1",
+  "description": "PaperPilot — 运行于 Coding Agent 的科研协作 Skills 包，覆盖选题、文献、数据、实证与写作",
   "author": {
     "name": "DGU-stallion"
   },
@@ -9,21 +9,18 @@
   "repository": "https://github.com/DGU-stallion/economic-paper-pipeline",
   "license": "MIT",
   "keywords": [
-    "economics",
-    "econometrics",
-    "python",
-    "statsmodels",
-    "linearmodels",
-    "latex",
-    "academic-research",
+    "research",
+    "academic",
+    "agent-skills",
     "paper-writing",
-    "empirical-analysis",
-    "chinese-economics"
+    "literature-review",
+    "econometrics",
+    "causal-inference"
   ],
   "requires": {
     "python": ">=3.11",
     "backends": {
-      "python-linearmodels": "recommended",
+      "python-linearmodels": "optional",
       "texlive": "optional"
     }
   }

@@ -10,14 +10,14 @@ Create a steering file that points to the skill:
 inclusion: auto
 ---
 
-# Paper Assistant Steering
+# PaperPilot Steering
 
-This project uses the Paper Assistant skill. Read `SKILL.md` for the
+This project uses the PaperPilot skill. Read `SKILL.md` for the
 full protocol. Key rules:
 
 1. Use `epp` CLI for all workflow operations
 2. Evidence status must be tracked (planned/user_supplied/executed/verified)
-3. Run `epp inspect . --json` on session start to diagnose project state
+3. Run `pp inspect . --json` on session start to diagnose project state
 4. Do not mark LLM output as executed or verified
 ```
 
@@ -45,7 +45,7 @@ atomic_save(project, state)
 
 ## Behavior Notes
 
-- Kiro supports hooks → can auto-run `epp inspect` on file changes
+- Kiro supports hooks → can auto-run `pp inspect` on file changes
 - Kiro has web search and fetch tools → `research` module works fully
 - MCP servers configured in `.kiro/settings/mcp.json` are available
 - Steering files guide behavior across sessions
@@ -62,7 +62,7 @@ Create a hook to auto-diagnose on session start:
   "when": { "type": "promptSubmit" },
   "then": {
     "type": "askAgent",
-    "prompt": "If this is a paper project, run epp inspect . --json silently and incorporate the state into your response."
+    "prompt": "If this is a paper project, run pp inspect . --json silently and incorporate the state into your response."
   }
 }
 ```

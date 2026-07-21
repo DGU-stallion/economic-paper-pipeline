@@ -33,12 +33,12 @@ atomic_save(project, state)
 - `research` module degrades to manual guidance (no web search)
 - All file operations and Python execution work normally
 - State is persisted in `pipeline_state.json` → sessions can resume
-- Use `epp inspect . --json` to resume from where the last session left off
+- Use `pp inspect . --json` to resume from where the last session left off
 
 ## Resuming Without Chat History
 
 ```bash
-epp inspect . --json
+pp inspect . --json
 ```
 
 This outputs the full project state. Codex can read it and continue from

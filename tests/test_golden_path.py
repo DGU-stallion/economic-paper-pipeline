@@ -37,7 +37,7 @@ class GoldenPathCliTests(unittest.TestCase):
         import shutil
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def _run_epp(self, *args: str) -> subprocess.CompletedProcess:
+    def _run_pp(self, *args: str) -> subprocess.CompletedProcess:
         return subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "pipeline.py"), *args],
             cwd=ROOT,
@@ -53,8 +53,8 @@ class GoldenPathCliTests(unittest.TestCase):
         )
 
     def test_inspect_empty_project_reports_blockers(self):
-        """epp inspect on an empty dir outputs valid JSON with blockers."""
-        result = self._run_epp("inspect", str(self.project_dir), "--json")
+        """pp inspect on an empty dir outputs valid JSON with blockers."""
+        result = self._run_pp("inspect", str(self.project_dir), "--json")
         self.assertEqual(result.returncode, 0, result.stderr)
         report = json.loads(result.stdout)
         self.assertEqual(report["schema_version"], "1")
@@ -62,19 +62,19 @@ class GoldenPathCliTests(unittest.TestCase):
         self.assertTrue(report["next_actions"])
 
     def test_doctor_runs_without_error(self):
-        """epp doctor --check --json exits 0 with a valid report."""
-        result = self._run_epp("doctor", "--check", "--json")
+        """pp doctor --check --json exits 0 with a valid report."""
+        result = self._run_pp("doctor", "--check", "--json")
         self.assertEqual(result.returncode, 0, result.stderr)
         report = json.loads(result.stdout)
         self.assertIn("status", report)
 
     def test_workflow_plan_rejects_missing_context(self):
-        """epp workflow plan analyze fails without upstream context."""
+        """pp workflow plan analyze fails without upstream context."""
         # Create a project first
-        self._run_epp("new", "test-golden")
-        self._run_epp("use", "test-golden")
+        self._run_pp("new", "test-golden")
+        self._run_pp("use", "test-golden")
 
-        result = self._run_epp("workflow", "plan", "analyze", "基准回归")
+        result = self._run_pp("workflow", "plan", "analyze", "基准回归")
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
         self.assertFalse(output["ok"])
