@@ -213,6 +213,14 @@ def cmd_doctor(args=None):
     raise SystemExit(doctor_main(doctor_args))
 
 
+def cmd_inspect(args=None):
+    """只读扫描论文项目的完成度、阻塞项和下一行动。"""
+    from scripts.paper_state import main as inspect_main
+
+    inspect_args = args[2:] if args else []
+    raise SystemExit(inspect_main(inspect_args))
+
+
 _COMMANDS = {
     "list": cmd_list,
     "new": cmd_new,
@@ -227,6 +235,7 @@ _COMMANDS = {
     "states": cmd_states,
     "cleanup": cmd_cleanup,
     "doctor": cmd_doctor,
+    "inspect": cmd_inspect,
     "help": lambda _: print("可用命令: " + ", ".join(sorted(_COMMANDS.keys()))),
 }
 
