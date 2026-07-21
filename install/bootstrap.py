@@ -156,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
         except Exception:
             pass
 
-    parser = argparse.ArgumentParser(description="PaperPilot无依赖环境诊断")
+    parser = argparse.ArgumentParser(description="PaperPilot 无依赖环境诊断")
     parser.add_argument("--check", action="store_true", help="只检测环境，不安装或修改系统")
     parser.add_argument("--profile", choices=("lite", "standard", "full"), default="standard")
     parser.add_argument("--json", action="store_true", help="输出稳定 JSON 报告")
