@@ -1,172 +1,88 @@
-# 安装与配置指南
+# 论文助手安装与配置
 
-## 前置要求
+论文助手的推荐入口是：从 README 复制安装 Prompt 给 Coding Agent，由 Agent 按 [`AGENT_INSTALL.md`](AGENT_INSTALL.md) 完成检测、安装和验证。
 
-### 必需软件
+## 安装档位
 
-| 软件 | 版本要求 | 说明 |
-|------|---------|------|
-| **Python** | 3.12+ | 数据处理、实证分析、工作流管理 |
-| **TeX Live** | 2023+ | LaTeX 论文编译，需安装 `collection-langchinese` 和 `collection-bibtexextra` |
+| 档位 | 用途 | 环境 |
+|------|------|------|
+| Lite | 选题、研究设计、文献和写作协作 | Python 3.11+ |
+| Standard | 默认；增加数据处理、FE、DID 和稳健性分析 | Lite + 锁定的 Python 分析依赖 |
+| Full | 增加本地 LaTeX、可选 R/Stata/MCP | Standard + 经用户确认的系统软件 |
 
-### 可选软件
+TeX Live、R、Stata、Node 和第三方 MCP 都不是 Standard 的静默安装项。
 
-| 软件 | 版本要求 | 说明 |
-|------|---------|------|
-| **uv** | 最新版 | Python 包管理器，用于可选 MCP 服务器 |
+## Agent 安装
 
-### Claude Code 配置
+把 README 的“一句话安装”Prompt 发给 Claude Code、Codex、Kiro、Cursor 或 OpenCode。Agent 应：
 
-本项目作为 Claude Code Skill 使用。
+1. 获取或更新仓库，但不覆盖未提交修改；
+2. 读取 `AGENT_INSTALL.md`；
+3. 先运行无修改 Doctor；
+4. 在仓库 `.venv` 中安装 Standard 依赖；
+5. 再次运行 Doctor 和安装测试；
+6. 报告已启用能力、未启用能力和原因。
 
----
+## 高级用户手动安装
 
-## 安装步骤
-
-### 1. 克隆项目
+要求：Git 和 Python 3.11+。
 
 ```bash
-git clone https://github.com/yourusername/economic-paper-pipeline.git
+git clone https://github.com/DGU-stallion/economic-paper-pipeline.git
 cd economic-paper-pipeline
+python3 install/bootstrap.py --check --profile standard
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r install/requirements-standard.txt
+.venv/bin/python install/bootstrap.py --check --profile standard
+.venv/bin/python tests/run_tests.py
 ```
 
-### 2. 安装 Python 依赖
+Windows 将 `.venv/bin/python` 替换为 `.venv\Scripts\python`。
+
+也可以从源码安装统一命令：
 
 ```bash
-pip install pandas numpy requests beautifulsoup4 yfinance openpyxl statsmodels linearmodels
+.venv/bin/python -m pip install ".[standard]"
+.venv/bin/epp doctor --json
 ```
 
-`linearmodels` 用于面板固定效应回归（替代传统 `reghdfe`）。
-
-### 3. 验证后端
+## Doctor 能力矩阵
 
 ```bash
-python3 -c "from linearmodels.panel import PanelOLS; print('Python 后端就绪')"
+python3 install/bootstrap.py --check --profile lite --json
+python3 install/bootstrap.py --check --profile standard --json
+python3 install/bootstrap.py --check --profile full --json
 ```
 
-### 4. 验证安装
+Doctor 只检测，不隐式下载 MCP、不启动后台进程，也不安装系统软件。`status=degraded` 表示某个当前档位的必需能力缺失；命令本身仍正常退出，以便 Agent 读取完整报告并修复。
 
-在 Claude Code 中打开项目目录，Agent 会自动问候你。
+## 搜索与 API Key
 
-**不要敲任何命令**。直接说：
-> "列出所有项目
+论文助手优先使用宿主 Agent 已明确声明的搜索能力。Tavily、paper-search MCP 等属于增强能力：
 
-Agent 会在后台执行并展示给你结果。
+- 启用前说明将发送的查询内容；
+- API Key 只通过环境变量或系统密钥存储；
+- 不把论文、原始数据、清洗数据或密钥上传到搜索服务；
+- 未启用时必须明确降级原因，不能假定 WebSearch 始终存在。
 
----
+## LaTeX
 
-## 纯对话式工作流
+Standard 可以生成 `.tex`，但本地 PDF 编译属于 Full 能力。没有 `xelatex` 和 `biber` 时可使用 Overleaf。安装完整 TeX Live 前，Agent 必须先说明下载体积和替代方案并获得确认。
 
-### 你可以说的话（自然语言即可，不限定措辞）
+## 更新
 
-| 当你想说... | Agent 自动执行的操作 |
-|-------------|-------------------|
-| "创建一篇关于 XXX 的论文" | 从 templates/ 创建新项目，自动切换，进入选题引导 |
-| "我有哪些论文项目？" | 列出所有项目的进度表格 |
-| "切换到 XXX 项目" | 激活指定项目，显示当前状态 |
-| "现在进展到哪了？" | 显示当前项目的阶段和历史 |
-| "这个阶段完成了" | 推进到下一阶段，告知你接下来做什么 |
-| "看看历史记录" | 展示项目的完成历史 |
-| "我想从头开始" | 重置当前项目（会先确认你的意图） |
-
-> 💡 **重要**：你永远不需要敲 `python pipeline.py xxx` 这种命令。有什么需求，直接用自然语言说。Agent 会在后台自动执行。
-
-### 目录结构说明
-
-```
-economic-paper-pipeline/
-├── scripts/                    # 核心脚本
-│   ├── backends/               # Python 后端（自动检测 + 分析/验证）
-│   │   ├── __init__.py         # 能力检测 (detect())
-│   │   ├── python_analysis.py  # PanelOLS, DID, 异质性
-│   │   └── python_verify.py    # 稳健性检验套件
-│   ├── orchestrator.py         # 编排器（状态管理 + 模块路由）
-│   ├── pipeline.py             # 后向兼容入口
-│   ├── shared/                 # 共享层（契约 / 注册表 / 状态）
-│   └── modules/                # 8 个独立模块
-│       ├── conceptualize/      # 概念助手
-│       ├── research/           # 调研助手
-│       ├── literature/         # 文献助手
-│       ├── data/               # 数据助手（pandas 清洗）
-│       ├── analyze/            # 分析助手（Python 回归）
-│       ├── verify/             # 验证助手（Python 稳健性）
-│       ├── write/              # 论文助手
-│       └── format/             # 格式助手
-├── papers/                     # 你的所有论文项目
-│   ├── demo-paper/
-│   └── my-first-paper/
-│       ├── topics/             # 选题研究
-│       ├── literature/         # 文献综述
-│       ├── data/               # raw/clean/scripts
-│       ├── analysis/           # output/
-│       └── paper/              # LaTeX 论文源码
-└── .mcp.json                   # MCP 服务器配置（可选）
-```
-
----
-
-## TeX Live 配置
-
-确保安装以下宏包集合：
-
-- `collection-langchinese`（中文支持）
-- `collection-bibtexextra`（biblatex-gb7714-2015 等）
-- `collection-latexextra`
-
-编译论文：
+更新前先检查工作区，避免覆盖本地修改：
 
 ```bash
-cd papers/<your-project>/paper
-xelatex main.tex
-biber main
-xelatex main.tex
-xelatex main.tex
+git status
+git pull --ff-only
+.venv/bin/python -m pip install -r install/requirements-standard.txt
+.venv/bin/epp doctor --json
 ```
 
----
-
-## 常见问题
-
-### Q: 如何迁移已有论文项目？
-
-将整个项目目录移动到 `papers/` 下，然后：
-
-```bash
-python pipeline.py use <your-project-name>
-```
-
-### Q: 如何更新框架版本？
-
-```bash
-git pull origin main
-```
-
-模板更新不会影响已有项目。如需将新模板特性应用到旧项目，手动复制对应文件。
-
-### Q: 如何备份项目？
-
-```bash
-# 备份单个项目
-tar -czf papers/my-project.tar.gz papers/my-project/
-
-# 或直接提交到 Git（推荐为每个项目创建独立仓库）
-```
-
-### Q: Python 后端提示找不到模块？
-
-```bash
-pip install linearmodels statsmodels pandas numpy
-```
-
-### Q: Python 后端面板回归报错？
-
-确保 linearmodels 版本 ≥ 7.0：
-```bash
-pip install --upgrade linearmodels
-```
-
----
+用户论文建议保存在独立私有仓库或通过 `EPP_PAPERS_DIR` 指向仓库外目录。
 
 ## 卸载
 
-删除整个项目目录即可，所有项目数据保存在 `papers/` 下。
+删除论文助手代码目录和其 `.venv` 即可。删除前先确认论文项目不在该目录中，或已完成备份。

@@ -127,13 +127,24 @@ def run_placebo_test(
     fe_time: str = "year",
     cluster_entity: str = "id",
     n_permutations: int = 100,
+    seed: Optional[int] = None,
     project_dir: Optional[Path] = None,
 ) -> dict:
-    """Randomly shuffle D variable and re-run regression (placebo)."""
+    """Randomly shuffle D variable and re-run regression (placebo).
+
+    Args:
+        seed: Random seed for reproducibility. If None, a seed is generated
+              and recorded in the output for provenance.
+    """
     df = _load_data(data_path)
     _validate_columns(df, [y_var, d_var, fe_entity, fe_time, cluster_entity]
                       + (controls or []))
     df = df.dropna(subset=[y_var, d_var])
+
+    # Record seed for reproducibility (release gate: all random processes record seed)
+    if seed is None:
+        seed = int(np.random.default_rng().integers(0, 2**31))
+    rng = np.random.default_rng(seed)
 
     real_res = _run_panel(df, y_var, d_var, controls, fe_entity, fe_time, cluster_entity)
     real_coef = float(real_res.params.get(d_var, 0))
@@ -141,7 +152,7 @@ def run_placebo_test(
     placebo_coefs = []
     for _ in range(n_permutations):
         p_df = df.copy()
-        shuffled = p_df[d_var].sample(frac=1).values
+        shuffled = rng.permutation(p_df[d_var].values)
         p_df[f"_placebo_{d_var}"] = shuffled
         try:
             res = _run_panel(p_df, y_var, f"_placebo_{d_var}", controls,
@@ -159,6 +170,7 @@ def run_placebo_test(
         "placebo_std": round(float(np.std(placebo_arr)), 4),
         "placebo_pval": round(p_val, 4),
         "n_permutations": n_permutations,
+        "seed": seed,
     }
 
     if project_dir:

@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools==81.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "economic-paper-pipeline"
+dynamic = ["version"]
+description = "Paper Assistant for coding agents and empirical research"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "DGU-stallion"}]
+keywords = ["economics", "econometrics", "research", "coding-agent", "paper-writing"]
+dependencies = []
+
+[project.optional-dependencies]
+standard = [
+  "numpy==2.4.6",
+  "pandas==3.0.3",
+  "statsmodels==0.14.6",
+  "linearmodels==7.0",
+  "openpyxl==3.1.5",
+  "pyarrow==24.0.0",
+]
+
+[project.scripts]
+epp = "scripts.pipeline:main"
+
+[project.urls]
+Homepage = "https://github.com/DGU-stallion/economic-paper-pipeline"
+Repository = "https://github.com/DGU-stallion/economic-paper-pipeline"
+
+[tool.setuptools.dynamic]
+version = {attr = "scripts.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["scripts*", "install*"]

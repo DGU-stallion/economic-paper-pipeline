@@ -205,6 +205,76 @@ def cmd_states(args=None):
         print(f"  {name:15s} | {states}")
 
 
+def cmd_doctor(args=None):
+    """运行无依赖环境诊断。"""
+    from install.bootstrap import main as doctor_main
+
+    doctor_args = args[2:] if args else []
+    raise SystemExit(doctor_main(doctor_args))
+
+
+def cmd_inspect(args=None):
+    """只读扫描论文项目的完成度、阻塞项和下一行动。"""
+    from scripts.paper_state import main as inspect_main
+
+    inspect_args = args[2:] if args else []
+    raise SystemExit(inspect_main(inspect_args))
+
+
+def cmd_workflow(args=None):
+    """工作流生命周期命令: plan/commit/verify/recover/revisions。"""
+    import scripts.workflow as wf
+
+    sub = args[2] if args and len(args) > 2 else ""
+    if not sub:
+        print("用法: epp workflow <plan|commit|verify|recover|revisions> [参数]")
+        return
+
+    project_name = get_current_project()
+    if not project_name:
+        print("❌ 未选择项目")
+        sys.exit(1)
+
+    if sub == "plan":
+        module = args[3] if len(args) > 3 else ""
+        desc = args[4] if len(args) > 4 else ""
+        if not module:
+            print("用法: epp workflow plan <模块名> [描述]")
+            sys.exit(1)
+        result = wf.plan(project_name, module, desc)
+    elif sub == "commit":
+        module = args[3] if len(args) > 3 else ""
+        if not module:
+            print("用法: epp workflow commit <模块名>")
+            sys.exit(1)
+        # Read result JSON from stdin or pass empty
+        result = wf.commit_result(project_name, module, result={})
+    elif sub == "verify":
+        module = args[3] if len(args) > 3 else ""
+        if not module:
+            print("用法: epp workflow verify <模块名>")
+            sys.exit(1)
+        result = wf.verify(project_name, module, checks_passed=True)
+    elif sub == "recover":
+        result = wf.recover(project_name)
+    elif sub == "revisions":
+        project_dir = get_project_path(project_name)
+        revisions = wf.list_revisions(project_dir)
+        if not revisions:
+            print("暂无修订版本")
+            return
+        for rev in revisions[:10]:
+            print(f"  {rev['revision_id']}  {rev['label']}  ({rev['timestamp']})")
+        return
+    else:
+        print("用法: epp workflow <plan|commit|verify|recover|revisions> [参数]")
+        return
+
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    if not result.get("ok"):
+        sys.exit(1)
+
+
 _COMMANDS = {
     "list": cmd_list,
     "new": cmd_new,
@@ -218,6 +288,9 @@ _COMMANDS = {
     "graph": cmd_graph,
     "states": cmd_states,
     "cleanup": cmd_cleanup,
+    "doctor": cmd_doctor,
+    "inspect": cmd_inspect,
+    "workflow": cmd_workflow,
     "help": lambda _: print("可用命令: " + ", ".join(sorted(_COMMANDS.keys()))),
 }
 

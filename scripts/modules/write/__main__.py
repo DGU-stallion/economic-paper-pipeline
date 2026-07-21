@@ -1,26 +1,30 @@
 #!/usr/bin/env python3
 """论文助手 — 独立运行入口"""
+
 import argparse
+import json
+
 from scripts.shared.paths import PAPERS_DIR
-from scripts.modules.write.core import run, commit_tex
 
 
 def main():
     parser = argparse.ArgumentParser(description="论文助手")
     parser.add_argument("--project", "-p", help="项目名")
-    parser.add_argument("--tex", help="LaTeX 源码文件路径")
+    parser.add_argument("--question", help="研究问题")
+    parser.add_argument("--y", help="被解释变量 Y")
+    parser.add_argument("--d", help="核心解释变量 D")
     args = parser.parse_args()
 
-    project_dir = PAPERS_DIR / args.project if args.project else None
+    from scripts.modules.write.core import run
 
-    if args.tex and project_dir:
-        with open(args.tex, "r", encoding="utf-8") as f:
-            content = f.read()
-        result = commit_tex(content, project_dir)
-        print(f"✅ 论文已写入 {result['tex_path']}")
-    else:
-        result = run(project_dir=project_dir)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+    project_dir = PAPERS_DIR / args.project if args.project else None
+    result = run(
+        research_question=args.question or "",
+        y_var=args.y or "",
+        d_var=args.d or "",
+        project_dir=project_dir,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

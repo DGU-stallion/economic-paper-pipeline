@@ -19,6 +19,7 @@ papers/*
 papers/*/pipeline_state.json
 papers/*/conversation.json
 papers/*/context/
+papers/*/.revisions/
 
 # ========================
 # Root-level temporary logs
