@@ -1,6 +1,6 @@
 # Paper Assistant — Skill Manifest
 
-**Version:** 5.0.0a1
+**Version:** 5.0.0a1 (source of truth: `scripts/__init__.__version__`)
 **Protocol:** CLI + JSON over stdout
 **Runtime:** Python ≥ 3.11 (no mandatory external services)
 

@@ -226,6 +226,10 @@ def cmd_workflow(args=None):
     import scripts.workflow as wf
 
     sub = args[2] if args and len(args) > 2 else ""
+    if not sub:
+        print("用法: epp workflow <plan|commit|verify|recover|revisions> [参数]")
+        return
+
     project_name = get_current_project()
     if not project_name:
         print("❌ 未选择项目")

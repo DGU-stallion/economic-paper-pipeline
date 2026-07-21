@@ -372,10 +372,20 @@ XeLaTeX → biber → XeLaTeX → XeLaTeX → Humanizer 质检
 economic-paper-pipeline/
 ├── CLAUDE.md                         # AI Skill 契约（核心交付物）
 │                                      # 8 能力定义 + 后端检测 + 行为准则
+├── SKILL.md                          # Agent-neutral Skill manifest（协议 + 证据状态）
+├── AGENT_INSTALL.md                  # Agent 安装契约（安全边界 + 验证步骤）
+│
+├── adapters/                         # 薄 Agent 适配器（不含核心逻辑）
+│   ├── claude_code.md                #   Claude Code 适配
+│   ├── codex.md                      #   OpenAI Codex 适配
+│   └── kiro.md                       #   AWS Kiro 适配
 │
 ├── scripts/                          # Python 后端实现
-│   ├── pipeline.py                   # CLI 入口（12 子命令）
+│   ├── pipeline.py                   # CLI 入口（epp 子命令）
 │   ├── orchestrator.py               # 编排器：状态机 + 模块路由
+│   ├── workflow.py                   # 工作流引擎：plan → commit → verify
+│   ├── paper_state.py                # 只读论文状态扫描器（7 维度）
+│   ├── agent_caps.py                 # Agent 能力声明与检测
 │   ├── shared/                       # 共享层
 │   │   ├── paths.py                  #   路径中心化
 │   │   ├── state.py                  #   pipeline_state 读写
@@ -384,7 +394,7 @@ economic-paper-pipeline/
 │   ├── backends/                     # 后端检测 + 分析引擎
 │   │   ├── __init__.py               #   detect() 能力检测（linearmodels/pyfixest/stata/thrreg）
 │   │   ├── python_analysis.py        #   PanelOLS / pyfixest / DID / 异质性
-│   │   ├── python_verify.py          #   稳健性检验套件
+│   │   ├── python_verify.py          #   稳健性检验套件（含 seed 记录）
 │   │   └── python_threshold.py       #   Hansen 门槛回归（可选 thrreg 桥接）
 │   └── modules/                      # 8 模块（对应 CLAUDE.md 8 能力）
 │       ├── conceptualize/            #   概念引导
@@ -401,22 +411,31 @@ economic-paper-pipeline/
 ├── papers/                           # 论文项目（每个独立状态）
 │   ├── demo-paper/                   #   内置演示
 │   └── <项目名>/
-│       ├── pipeline_state.json       #   状态 + context_store
-│       ├── project_config.json       #   变量映射
+│       ├── pipeline_state.json       #   状态 + context_store + agent_capabilities
+│       ├── .revisions/               #   修订快照（自动管理）
 │       ├── topics/                   #   选题产出
 │       ├── literature/               #   综述 + .bib
 │       ├── data/                     #   raw/clean/scripts
 │       ├── analysis/                 #   output/（.tex 表格）
 │       └── paper/                    #   .tex + .pdf
 │
+├── .github/workflows/ci.yml         # CI: macOS + Linux + Windows smoke test
 ├── .claude-plugin/                   # Claude Code 集成（可选）
 │   └── plugin.json
 ├── commands/                         # /econ-* 斜杠命令
 ├── hooks/                            # 生命周期钩子
 ├── templates/                        # 论文/数据/分析模板
-├── tests/                            # E2E 测试
-│   ├── run_tests.py
+├── tests/                            # 测试（pytest，隔离临时目录）
+│   ├── test_bootstrap.py
+│   ├── test_core_runtime.py
+│   ├── test_paper_state.py
+│   ├── test_workflow.py
+│   ├── test_golden_path.py
+│   ├── test_readme_examples.py
 │   └── fixtures/
+├── install/                          # 安装和环境诊断
+│   ├── bootstrap.py                  #   无依赖安装/诊断脚本
+│   └── requirements-standard.txt     #   锁定依赖清单
 ├── .mcp.json                         # MCP 服务器配置（可选）
 └── .config/                          # 当前项目配置
 ```
@@ -440,10 +459,10 @@ economic-paper-pipeline/
 ### 运行测试
 
 ```bash
-python3 tests/run_tests.py
+python3 -m pytest tests/ -v
 ```
 
-覆盖：FE 面板回归、DID、LaTeX 编译可用性、cleanup 命令。
+覆盖：安装契约、环境诊断、FE/DID 真实回归、论文状态扫描、工作流生命周期、黄金路径、README 示例和版本单一来源验证。
 
 ### 扩展新能力
 
@@ -512,6 +531,6 @@ MIT License。详见 [LICENSE](LICENSE)。
 - **适配更多 AI 工具**：补充其他 AI 平台的 Skill 加载说明
 
 提交 PR 前：
-1. `python3 tests/run_tests.py` 确认无回归
+1. `python3 -m pytest tests/ -v` 确认无回归
 2. 更新 `CLAUDE.md` 与实现保持一致
 3. 遵循 `ModuleContract` 契约模式
