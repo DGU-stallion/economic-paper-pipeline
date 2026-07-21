@@ -19,7 +19,7 @@ PLACEHOLDER_MARKERS = ("todo", "tbd", "placeholder", "待补充", "待定", "示
 
 
 def _relative(project_dir: Path, paths: Iterable[Path]) -> list[str]:
-    return sorted({str(path.relative_to(project_dir)) for path in paths if path.is_file()})
+    return sorted({str(path.relative_to(project_dir)).replace("\\", "/") for path in paths if path.is_file()})
 
 
 def _files(project_dir: Path, *patterns: str) -> list[Path]:
