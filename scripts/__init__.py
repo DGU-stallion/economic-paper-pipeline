@@ -1,3 +1,3 @@
-"""Paper Assistant Python package."""
+"""PaperPilot — agent skills for academic research."""
 
-__version__ = "5.0.0a1"
+__version__ = "6.0.0a1"

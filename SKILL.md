@@ -1,6 +1,6 @@
-# Paper Assistant — Skill Manifest
+# PaperPilot — Skill Manifest
 
-**Version:** 5.0.0a1 (source of truth: `scripts/__init__.__version__`)
+**Version:** 6.0.0a1 (source of truth: `scripts/__init__.__version__`)
 **Protocol:** CLI + JSON over stdout
 **Runtime:** Python ≥ 3.11 (no mandatory external services)
 
@@ -39,24 +39,24 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[standard]"
 ### 2. Diagnose
 
 ```bash
-epp doctor --json        # environment capabilities
-epp inspect <dir> --json # paper project state
+pp doctor --json        # environment capabilities
+pp inspect <dir> --json # paper project state
 ```
 
 ### 3. Execute Workflow
 
 ```bash
-epp workflow plan <module> [description]
+pp workflow plan <module> [description]
 # ... agent runs module logic ...
-epp workflow commit <module>
-epp workflow verify <module>
+pp workflow commit <module>
+pp workflow verify <module>
 ```
 
 ### 4. Recover
 
 ```bash
-epp workflow recover
-epp workflow revisions
+pp workflow recover
+pp workflow revisions
 ```
 
 ## Agent Capability Declaration

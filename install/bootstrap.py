@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free environment doctor for the Paper Assistant."""
+"""Dependency-free environment doctor for PaperPilot."""
 
 from __future__ import annotations
 
@@ -136,7 +136,7 @@ def build_report(profile: str) -> dict[str, Any]:
 
 
 def print_human(report: dict[str, Any]) -> None:
-    print(f"论文助手环境诊断：{report['status']} ({report['profile']})")
+    print(f"PaperPilot环境诊断：{report['status']} ({report['profile']})")
     for name, item in report["capabilities"].items():
         marker = "OK" if item["available"] else "--"
         required = " [必需]" if item["required"] else ""
@@ -156,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
         except Exception:
             pass
 
-    parser = argparse.ArgumentParser(description="论文助手无依赖环境诊断")
+    parser = argparse.ArgumentParser(description="PaperPilot无依赖环境诊断")
     parser.add_argument("--check", action="store_true", help="只检测环境，不安装或修改系统")
     parser.add_argument("--profile", choices=("lite", "standard", "full"), default="standard")
     parser.add_argument("--json", action="store_true", help="输出稳定 JSON 报告")

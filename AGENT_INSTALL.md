@@ -1,4 +1,4 @@
-# 论文助手 Agent 安装契约
+# PaperPilot Agent 安装契约
 
 本文档供 Claude Code、Codex、Kiro、Cursor、OpenCode 等 Coding Agent 执行。用户不应被要求手动完成 Agent 可以安全完成的命令。
 
@@ -15,7 +15,7 @@
 
 ### 1. 获取仓库
 
-如果当前目录不是论文助手仓库，克隆：
+如果当前目录不是PaperPilot仓库，克隆：
 
 ```bash
 git clone https://github.com/DGU-stallion/economic-paper-pipeline.git
@@ -66,7 +66,7 @@ Windows 使用 `.venv\Scripts\python`。
 
 ### 5. 加载 Skill
 
-把仓库根目录作为论文助手工作目录，读取 `CLAUDE.md` 了解当前能力契约。不同 Agent 的专属薄适配器将在 `adapters/` 中提供；缺少专属适配器时，使用仓库文档和 Python CLI，不要猜测不存在的命令。
+把仓库根目录作为PaperPilot工作目录，读取 `CLAUDE.md` 了解当前能力契约。不同 Agent 的专属薄适配器将在 `adapters/` 中提供；缺少专属适配器时，使用仓库文档和 Python CLI，不要猜测不存在的命令。
 
 ### 6. 验证和报告
 

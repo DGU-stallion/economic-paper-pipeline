@@ -3,14 +3,14 @@ requires = ["setuptools==81.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "economic-paper-pipeline"
+name = "paperpilot"
 dynamic = ["version"]
-description = "Paper Assistant for coding agents and empirical research"
+description = "PaperPilot — agent skills for academic research, from topic exploration to publication"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "DGU-stallion"}]
-keywords = ["economics", "econometrics", "research", "coding-agent", "paper-writing"]
+keywords = ["research", "academic", "agent-skills", "paper-writing", "literature-review", "econometrics"]
 dependencies = []
 
 [project.optional-dependencies]
@@ -24,7 +24,7 @@ standard = [
 ]
 
 [project.scripts]
-epp = "scripts.pipeline:main"
+pp = "scripts.pipeline:main"
 
 [project.urls]
 Homepage = "https://github.com/DGU-stallion/economic-paper-pipeline"
@@ -35,3 +35,6 @@ version = {attr = "scripts.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["scripts*", "install*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
