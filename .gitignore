@@ -53,9 +53,12 @@ venv/
 Thumbs.db
 
 # ========================
-# Claude Code (user-specific config)
+# Agent-specific config (user-local, not project)
 # ========================
 .claude/
+.claude-plugin/
+commands/
+hooks/
 
 # ========================
 # Pipeline state (machine-local, per project)
